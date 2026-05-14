@@ -698,6 +698,11 @@ class MainWindow(QtWidgets.QMainWindow):
         return s
 
     def _switch(self, name: str):
+        # Kein Tab-Wechsel weg vom Service während eine Fahrt läuft
+        if name != "service" and self._service_busy:
+            self._toast("Fahrt läuft noch", "Bitte warten bis der Schlitten steht")
+            return
+
         m = {
             "status":  (self.btn_status,  self.page_status),
             "manuell": (self.btn_manuell, self.page_manuell),

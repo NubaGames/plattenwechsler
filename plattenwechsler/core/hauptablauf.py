@@ -80,6 +80,7 @@ class Hauptablauf:
         self._queue_bei_quittierung_leeren = False
         self.stats = _Stats()
         self._aktiver_drucker: Optional[int] = None
+        self._pending_nach_service: set = set()  # Drucker-IDs die im Service-Modus gemeldet haben
 
         self._drucker_status: dict = {}
         self._refresh_drucker_status_keys()
@@ -179,7 +180,11 @@ class Hauptablauf:
     # Trigger
     # ============================================================
     def _on_drucker_fertig(self, drucker_id: int):
-        self._set_drucker_status(drucker_id, DruckerStatus.IN_QUEUE)
+        if self.state == SystemState.SERVICE:
+            self._pending_nach_service.add(drucker_id)
+            self._set_drucker_status(drucker_id, DruckerStatus.IN_QUEUE)
+            logger.info("Drucker %d im Service-Modus gemeldet — wird nach Service eingereiht", drucker_id)
+            return
         self.auftrag_aufnehmen(drucker_id, AuftragQuelle.DRUCKER_FERTIG)
 
     def _on_endschalter(self, axis: str):
@@ -266,6 +271,9 @@ class Hauptablauf:
     def service_modus_verlassen(self):
         if self.state == SystemState.SERVICE:
             self._set_state(SystemState.BEREITSCHAFT)
+            for did in list(self._pending_nach_service):
+                self.auftrag_aufnehmen(did, AuftragQuelle.DRUCKER_FERTIG)
+            self._pending_nach_service.clear()
 
     def service_fahre_zu_drucker(self, drucker_id: int) -> bool:
         if self.state != SystemState.SERVICE: return False
