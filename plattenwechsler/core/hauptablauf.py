@@ -77,6 +77,7 @@ class Hauptablauf:
         self._stop_flag = threading.Event()
         self._worker_thread: Optional[threading.Thread] = None
         self._not_aus_aktiv = False
+        self._queue_bei_quittierung_leeren = False
         self.stats = _Stats()
         self._aktiver_drucker: Optional[int] = None
 
@@ -405,6 +406,7 @@ class Hauptablauf:
     # ============================================================
     def _plattenwechsel(self, a: Auftrag, d: DruckerConfig):
         logger.info("Plattenwechsel start: %s", a)
+        self._queue_bei_quittierung_leeren = True
         ablage = self.config.position("ablage")
         magazin = self.config.position("magazin")
         if not (ablage and magazin):
@@ -442,6 +444,7 @@ class Hauptablauf:
             self._move_home()
         else:
             logger.info("Weitere Aufträge in Queue — Heimfahrt übersprungen")
+        self._queue_bei_quittierung_leeren = False
         logger.info("Plattenwechsel %s erfolgreich", a)
 
     def _tuer_oeffnen(self, d: DruckerConfig):
@@ -532,16 +535,16 @@ class Hauptablauf:
             return
         if self._not_aus_aktiv:
             self._not_aus_aktiv = False
-        # Nach Entnahmefehler: Queue leeren — Ablage/Magazin-Zustand unbekannt
-        f = self.fehler.aktiver_fehler
-        if f and f.klasse == ErrorClass.ENTNAHMEFEHLER:
+        # Fehler während eines Plattenwechsels: Queue leeren,
+        # da physischer Zustand von Ablage/Magazin/Schlitten unbekannt ist
+        if self._queue_bei_quittierung_leeren:
+            self._queue_bei_quittierung_leeren = False
             n = self.queue.leeren()
             for did in list(self._drucker_status.keys()):
                 self._set_drucker_status(did, DruckerStatus.BEREIT)
             self.esp.status.has_plate = False
-            if n:
-                logger.warning("Entnahmefehler: %d Aufträge aus Queue entfernt "
-                               "— bitte Ablage, Magazin und Schlitten prüfen", n)
+            logger.warning("Plattenwechsel unterbrochen: Queue geleert (%d Aufträge) "
+                           "— bitte Ablage, Magazin und Schlitten prüfen", n)
         try:
             if self.esp.is_connected():
                 if self.esp.status.state == EspState.ERROR:
