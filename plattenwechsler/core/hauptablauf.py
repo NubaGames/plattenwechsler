@@ -532,6 +532,16 @@ class Hauptablauf:
             return
         if self._not_aus_aktiv:
             self._not_aus_aktiv = False
+        # Nach Entnahmefehler: Queue leeren — Ablage/Magazin-Zustand unbekannt
+        f = self.fehler.aktiver_fehler
+        if f and f.klasse == ErrorClass.ENTNAHMEFEHLER:
+            n = self.queue.leeren()
+            for did in list(self._drucker_status.keys()):
+                self._set_drucker_status(did, DruckerStatus.BEREIT)
+            self.esp.status.has_plate = False
+            if n:
+                logger.warning("Entnahmefehler: %d Aufträge aus Queue entfernt "
+                               "— bitte Ablage, Magazin und Schlitten prüfen", n)
         try:
             if self.esp.is_connected():
                 if self.esp.status.state == EspState.ERROR:

@@ -4,7 +4,8 @@
       "Bash(python -m pytest tests/test_hauptablauf_mock.py -x -q)",
       "Bash(python3 -m pytest tests/test_hauptablauf_mock.py -x -q)",
       "Bash(python3 -c \"from plattenwechsler.types import EspState, DruckerConfig; from plattenwechsler.io_.mock_esp_client import MockEspClient; from plattenwechsler.core.hauptablauf import Hauptablauf; print\\('OK'\\)\")",
-      "Bash(python3 -c ' *)"
+      "Bash(python3 -c ' *)",
+      "Bash(python3 -c \"from plattenwechsler.core.hauptablauf import Hauptablauf; print\\('OK'\\)\")"
     ]
   }
 }
