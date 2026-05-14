@@ -21,14 +21,16 @@ TEST_CFG = {
     "drucker": [
         {"id": 1, "name": "Drucker 1", "pin_fertig": 17,
          "pos_x": 100, "pos_z_anfahr": 200, "pos_z_tuer": 250,
-         "pos_z_druckbett": 50, "door_arm_hub_mm": 50},
+         "pos_z_druckbett": 50, "door_arm_hub_mm": 50,
+         "gripper_depth": 120, "lift_offset": 8},
         {"id": 2, "name": "Drucker 2", "pin_fertig": 27,
          "pos_x": 400, "pos_z_anfahr": 200, "pos_z_tuer": 250,
-         "pos_z_druckbett": 50, "door_arm_hub_mm": 50},
+         "pos_z_druckbett": 50, "door_arm_hub_mm": 50,
+         "gripper_depth": 120, "lift_offset": 8},
     ],
     "positionen": {
-        "ablage":  {"x": 1200, "z": 100},
-        "magazin": {"x": 1300, "z": 150},
+        "ablage":  {"x": 1200, "z": 100, "gripper_depth": 120, "lift_offset": 8},
+        "magazin": {"x": 1300, "z": 150, "gripper_depth": 120, "lift_offset": 8},
     },
     "mqtt": {"enabled": False}, "telegram": {"enabled": False},
 }
@@ -155,7 +157,8 @@ class TestDruckerVerwaltung:
         assert new_id == 3
         cfg.drucker_setzen(DruckerConfig(id=new_id, name="Test",
             pos_x=2000, pos_z_anfahr=100, pos_z_tuer=150,
-            pos_z_druckbett=20, door_arm_hub_mm=40, pin_fertig=5))
+            pos_z_druckbett=20, door_arm_hub_mm=40, pin_fertig=5,
+            gripper_depth=100, lift_offset=10))
         assert cfg.drucker(3) is not None
         assert cfg.drucker_entfernen(3)
         assert cfg.drucker(3) is None

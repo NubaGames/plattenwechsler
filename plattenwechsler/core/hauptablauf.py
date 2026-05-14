@@ -1,31 +1,35 @@
 """Hauptablauf-Statemachine.
 
-Plattenwechsel-Sequenz (Pi steuert ESP über SET_CLAMP/SET_DOOR_ARM/MOVE_TO):
+Plattenwechsel-Sequenz (Pi steuert ESP über PICKUP/DEPOSIT/SET_DOOR_ARM/MOVE_TO):
 
   Phase 1 — Platte aus Drucker holen:
     1. MOVE_TO (drucker.x, drucker.z_anfahr)
     2. MOVE_TO (drucker.x, drucker.z_tuer)
     3. SET_DOOR_ARM OPEN
-    4. STATUS-Check: door_open == True (VL53L0X am Schlitten misst)
-    5. MOVE_TO (drucker.x, drucker.z_druckbett)
-    6. SET_CLAMP CLOSED  → Platte gegriffen
-    7. MOVE_TO (drucker.x, drucker.z_anfahr)
-    8. MOVE_TO (drucker.x, drucker.z_tuer)
-    9. SET_DOOR_ARM CLOSED
+    4. MOVE_TO (drucker.x, drucker.z_druckbett)   ← Gabel-Bereitschaftspos.
+    5. PICKUP (gripper_depth, lift_offset)          ← ESP prüft door_open intern
+    6. MOVE_TO (drucker.x, drucker.z_tuer)
+    7. SET_DOOR_ARM CLOSED
 
   Phase 2 — Platte ablegen:
-   10. MOVE_TO ablage
-   11. SET_CLAMP OPEN
+    8. MOVE_TO ablage
+    9. DEPOSIT (gripper_depth, lift_offset)
 
   Phase 3 — Neue Platte holen:
-   12. MOVE_TO magazin
-   13. SET_CLAMP CLOSED
+   10. MOVE_TO magazin
+   11. PICKUP (gripper_depth, lift_offset)
 
-  Phase 4 — Platte in Drucker einsetzen (analog Phase 1, aber mit OPEN am Bett):
-   14-22. wie Phase 1, Schritt 6 ist SET_CLAMP OPEN
+  Phase 4 — Platte in Drucker einsetzen:
+   12. MOVE_TO (drucker.x, drucker.z_anfahr)
+   13. MOVE_TO (drucker.x, drucker.z_tuer)
+   14. SET_DOOR_ARM OPEN
+   15. MOVE_TO (drucker.x, drucker.z_druckbett)
+   16. DEPOSIT (gripper_depth, lift_offset)
+   17. MOVE_TO (drucker.x, drucker.z_tuer)
+   18. SET_DOOR_ARM CLOSED
 
-  Phase 5 — Heimfahrt:
-   23. MOVE_HOME
+  Phase 5 — Heimfahrt (nur wenn Queue leer):
+   19. MOVE_HOME
 """
 from __future__ import annotations
 
@@ -39,7 +43,7 @@ from ..config import Config, Position
 from ..types import (
     SystemState, EspState, ErrorClass,
     Auftrag, AuftragQuelle, DruckerStatus,
-    ClampPosition, DoorArmPosition, DruckerConfig,
+    DoorArmPosition, DruckerConfig,
     PlattenwechslerError, EspKommunikationsError, EspBefehlAbgelehnt,
     EspTimeoutError,
 )
@@ -409,26 +413,26 @@ class Hauptablauf:
 
         # Phase 1: alte Platte aus Drucker holen
         self._tuer_oeffnen(d)
-        self._fahre(d.pos_x, d.pos_z_druckbett, f"Drucker {d.id} Druckbett")
-        self._clamp(ClampPosition.CLOSED, "Platte greifen")
+        self._fahre(d.pos_x, d.pos_z_druckbett, f"Drucker {d.id} Abholposition")
+        self._pickup(d.gripper_depth, d.lift_offset, f"Drucker {d.id}")
         self.esp.status.has_plate = True
         self._fahre(d.pos_x, d.pos_z_tuer, f"Drucker {d.id} Tür-Höhe (raus)")
         self._tuer_schliessen()
 
         # Phase 2: alte Platte ablegen
         self._fahre(ablage.x, ablage.z, "Ablage")
-        self._clamp(ClampPosition.OPEN, "Platte ablegen")
+        self._deposit(ablage.gripper_depth, ablage.lift_offset, "Ablage")
         self.esp.status.has_plate = False
 
         # Phase 3: neue Platte aus Magazin
         self._fahre(magazin.x, magazin.z, "Magazin")
-        self._clamp(ClampPosition.CLOSED, "Platte aus Magazin")
+        self._pickup(magazin.gripper_depth, magazin.lift_offset, "Magazin")
         self.esp.status.has_plate = True
 
         # Phase 4: neue Platte in Drucker einsetzen
         self._tuer_oeffnen(d)
-        self._fahre(d.pos_x, d.pos_z_druckbett, f"Drucker {d.id} Druckbett")
-        self._clamp(ClampPosition.OPEN, "Platte einsetzen")
+        self._fahre(d.pos_x, d.pos_z_druckbett, f"Drucker {d.id} Einlegeposition")
+        self._deposit(d.gripper_depth, d.lift_offset, f"Drucker {d.id}")
         self.esp.status.has_plate = False
         self._fahre(d.pos_x, d.pos_z_tuer, f"Drucker {d.id} Tür-Höhe (raus)")
         self._tuer_schliessen()
@@ -452,14 +456,6 @@ class Hauptablauf:
         except (EspTimeoutError, EspKommunikationsError) as e:
             raise PlattenwechslerError(ErrorClass.TUERFEHLER,
                 f"Türarm öffnen: {e}")
-        # VL53L0X-Check: ist die Tür wirklich offen?
-        time.sleep(0.3)
-        try: self.esp.request_status()
-        except Exception: pass
-        if not self.esp.status.door_open:
-            raise PlattenwechslerError(ErrorClass.TUERFEHLER,
-                f"Tür Drucker {d.id} öffnete nicht "
-                f"(door_dist_mm={self.esp.status.door_dist_mm})")
 
     def _tuer_schliessen(self):
         try:
@@ -485,16 +481,33 @@ class Hauptablauf:
             raise PlattenwechslerError(ErrorClass.FAHRFEHLER,
                 f"MOVE_TO {kontext}: {e}")
 
-    def _clamp(self, pos: ClampPosition, kontext: str):
-        logger.info("SET_CLAMP %s (%s)", pos.value, kontext)
+    def _pickup(self, gripper_depth: int, lift_offset: int, kontext: str):
+        logger.info("PICKUP gd=%d lo=%d (%s)", gripper_depth, lift_offset, kontext)
         try:
-            self.esp.set_clamp(pos, timeout_s=self._mech_timeout_s)
+            self.esp.pickup(gripper_depth, lift_offset,
+                            timeout_s=self._mech_timeout_s)
         except EspBefehlAbgelehnt as e:
-            raise PlattenwechslerError(ErrorClass.ENTNAHMEFEHLER,
-                f"Halteservo {pos.value}: {e.esp_code}", esp_code=e.esp_code)
+            klasse = (ErrorClass.TUERFEHLER if e.esp_code == "DOOR_NOT_OPEN"
+                      else ErrorClass.ENTNAHMEFEHLER)
+            raise PlattenwechslerError(klasse,
+                f"PICKUP {kontext}: {e.esp_code}", esp_code=e.esp_code)
         except (EspTimeoutError, EspKommunikationsError) as e:
             raise PlattenwechslerError(ErrorClass.ENTNAHMEFEHLER,
-                f"Halteservo {pos.value}: {e}")
+                f"PICKUP {kontext}: {e}")
+
+    def _deposit(self, gripper_depth: int, lift_offset: int, kontext: str):
+        logger.info("DEPOSIT gd=%d lo=%d (%s)", gripper_depth, lift_offset, kontext)
+        try:
+            self.esp.deposit(gripper_depth, lift_offset,
+                             timeout_s=self._mech_timeout_s)
+        except EspBefehlAbgelehnt as e:
+            klasse = (ErrorClass.TUERFEHLER if e.esp_code == "DOOR_NOT_OPEN"
+                      else ErrorClass.ENTNAHMEFEHLER)
+            raise PlattenwechslerError(klasse,
+                f"DEPOSIT {kontext}: {e.esp_code}", esp_code=e.esp_code)
+        except (EspTimeoutError, EspKommunikationsError) as e:
+            raise PlattenwechslerError(ErrorClass.ENTNAHMEFEHLER,
+                f"DEPOSIT {kontext}: {e}")
 
     def _move_home(self):
         try:

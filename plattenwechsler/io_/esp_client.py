@@ -1,7 +1,7 @@
 """ESP-Client (UART) — Pi ↔ ESP32 nach Schnittstellen-Spezifikation Mai 2026.
 
 Befehle: PING, STATUS, STREAM_ON/OFF, HOME, MOVE_HOME, MOVE_TO, STOP,
-RESET_ERROR, HOME_SWITCH_HIT, SET_CLAMP, SET_DOOR_ARM.
+RESET_ERROR, HOME_SWITCH_HIT, PICKUP, DEPOSIT, SET_DOOR_ARM.
 """
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ from typing import Callable, Optional
 
 from ..types import (
     EspKommunikationsError, EspBefehlAbgelehnt, EspTimeoutError,
-    EspState, EspStatus, ClampPosition, DoorArmPosition,
+    EspState, EspStatus, DoorArmPosition,
 )
 
 logger = logging.getLogger(__name__)
@@ -134,13 +134,15 @@ class BaseEspClient:
             raise ValueError(f"Achse: {axis}")
         self.send_and_wait("HOME_SWITCH_HIT", axis=axis)
 
-    def set_clamp(self, position: ClampPosition, timeout_s: float = 10.0):
-        msg = self.send_and_wait("SET_CLAMP", position=position.value)
-        self.wait_for_event(msg.msg_id, {
-            ClampPosition.OPEN: "CLAMP_OPEN",
-            ClampPosition.CLOSED: "CLAMP_CLOSED",
-            ClampPosition.SERVICE: "CLAMP_SERVICE",
-        }[position], timeout_s=timeout_s)
+    def pickup(self, gripper_depth: int, lift_offset: int, timeout_s: float = 10.0):
+        msg = self.send_and_wait("PICKUP",
+                                 gripper_depth=gripper_depth, lift_offset=lift_offset)
+        self.wait_for_event(msg.msg_id, "PICKUP_DONE", timeout_s=timeout_s)
+
+    def deposit(self, gripper_depth: int, lift_offset: int, timeout_s: float = 10.0):
+        msg = self.send_and_wait("DEPOSIT",
+                                 gripper_depth=gripper_depth, lift_offset=lift_offset)
+        self.wait_for_event(msg.msg_id, "DEPOSIT_DONE", timeout_s=timeout_s)
 
     def set_door_arm(self, position: DoorArmPosition,
                      timeout_s: float = 10.0):
@@ -369,6 +371,7 @@ class EspClient(BaseEspClient):
             self.status.obstacle_ok = f.get("obstacle_ok", "1") == "1"
             self.status.door_open = f.get("door_open", "0") == "1"
             self._set_int(f, "door_dist_mm", "door_dist_mm")
+            self.status.plate_detected = f.get("plate_detected", "0") == "1"
             self.status.last_update = time.time()
         if self.on_status_update:
             try: self.on_status_update(self.status)

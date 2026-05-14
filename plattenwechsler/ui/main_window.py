@@ -307,6 +307,16 @@ class DruckerEditor(QtWidgets.QFrame):
         self.f_hub.setSuffix(" mm")
         form.addWidget(lbl("Türarm-Hub"), 6, 0); form.addWidget(self.f_hub, 6, 1)
 
+        self.f_gd = QtWidgets.QSpinBox()
+        self.f_gd.setRange(0, 500); self.f_gd.setValue(dc.gripper_depth)
+        self.f_gd.setSuffix(" mm")
+        form.addWidget(lbl("Greifer-Tiefe"), 7, 0); form.addWidget(self.f_gd, 7, 1)
+
+        self.f_lo = QtWidgets.QSpinBox()
+        self.f_lo.setRange(0, 100); self.f_lo.setValue(dc.lift_offset)
+        self.f_lo.setSuffix(" mm")
+        form.addWidget(lbl("Hub-Offset"), 8, 0); form.addWidget(self.f_lo, 8, 1)
+
         v.addLayout(form)
 
         row = QtWidgets.QHBoxLayout()
@@ -331,6 +341,8 @@ class DruckerEditor(QtWidgets.QFrame):
             pos_z_tuer=self.f_tuer.value(),
             pos_z_druckbett=self.f_bett.value(),
             door_arm_hub_mm=self.f_hub.value(),
+            gripper_depth=self.f_gd.value(),
+            lift_offset=self.f_lo.value(),
         )
         self.saved.emit(new_dc)
 

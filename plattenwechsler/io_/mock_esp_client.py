@@ -32,12 +32,14 @@ class MockEspClient(BaseEspClient):
 
         # Fehler-Injection
         self.simuliere_fehler: Optional[str] = None
-        # Standardmäßig: wenn Türarm ausgefahren → door_open = True
+        # Wenn False: SET_DOOR_ARM OPEN setzt door_open nicht auf True
+        # (simuliert Tür die sich nicht geöffnet hat)
         self.tuer_offen_wenn_arm_aus = True
 
+        # door_open startet True (offener Raum, kein Drucker davor)
         self.status = EspStatus(state=EspState.NOT_REFERENCED,
                                 gripper_home=True, door_arm_home=True,
-                                obstacle_ok=True)
+                                obstacle_ok=True, door_open=True)
 
     def is_connected(self) -> bool:
         return self._connected
@@ -171,17 +173,30 @@ class MockEspClient(BaseEspClient):
         if befehl == "HOME_SWITCH_HIT":
             return ack
 
-        if befehl == "SET_CLAMP":
-            if self.status.state == EspState.ERROR or self.status.busy:
+        if befehl == "PICKUP":
+            if not self.status.referenced:
+                raise EspBefehlAbgelehnt("NOT_REFERENCED")
+            if self.status.state == EspState.ERROR:
                 raise EspBefehlAbgelehnt("INVALID_STATE")
-            pos = params.get("position", "OPEN")
-            evmap = {"OPEN": "CLAMP_OPEN", "CLOSED": "CLAMP_CLOSED",
-                     "SERVICE": "CLAMP_SERVICE"}
-            if pos not in evmap:
-                raise EspBefehlAbgelehnt("INVALID_COMMAND")
-            threading.Thread(target=self._async_clamp,
-                             args=(cmd_id, pos, evmap[pos]),
-                             daemon=True).start()
+            if not self.status.door_open:
+                raise EspBefehlAbgelehnt("DOOR_NOT_OPEN")
+            lo = int(params.get("lift_offset", 8))
+            self._fire_state(EspState.BUSY_PICKUP)
+            threading.Thread(target=self._async_pickup,
+                             args=(cmd_id, lo), daemon=True).start()
+            return ack
+
+        if befehl == "DEPOSIT":
+            if not self.status.referenced:
+                raise EspBefehlAbgelehnt("NOT_REFERENCED")
+            if self.status.state == EspState.ERROR:
+                raise EspBefehlAbgelehnt("INVALID_STATE")
+            if not self.status.door_open:
+                raise EspBefehlAbgelehnt("DOOR_NOT_OPEN")
+            lo = int(params.get("lift_offset", 8))
+            self._fire_state(EspState.BUSY_DEPOSIT)
+            threading.Thread(target=self._async_deposit,
+                             args=(cmd_id, lo), daemon=True).start()
             return ack
 
         if befehl == "SET_DOOR_ARM":
@@ -273,18 +288,41 @@ class MockEspClient(BaseEspClient):
         self._fire_event_ok(cmd_id, "MOVE_DONE")
         self._fire_state(EspState.READY)
 
-    def _async_clamp(self, cmd_id: int, pos: str, evname: str):
+    def _async_pickup(self, cmd_id: int, lift_offset: int):
         time.sleep(self._mech_dauer_s)
+        with self._lock:
+            if self.status.state != EspState.BUSY_PICKUP:
+                return
+        if self.simuliere_fehler == "SENSOR_FAULT_GRIPPER":
+            self._fire_error("SENSOR_FAULT_GRIPPER"); return
+        if self.simuliere_fehler == "PLATE_NOT_DETECTED":
+            self._fire_error("PLATE_NOT_DETECTED"); return
+        with self._lock:
+            self.status.z_mm += lift_offset
+            self.status.plate_detected = True
+            self.status.gripper_home = True
+        self._fire_event_ok(cmd_id, "PICKUP_DONE")
+        self._fire_state(EspState.READY)
+
+    def _async_deposit(self, cmd_id: int, lift_offset: int):
+        time.sleep(self._mech_dauer_s)
+        with self._lock:
+            if self.status.state != EspState.BUSY_DEPOSIT:
+                return
         if self.simuliere_fehler == "SENSOR_FAULT_GRIPPER":
             self._fire_error("SENSOR_FAULT_GRIPPER"); return
         with self._lock:
-            self.status.gripper_home = (pos == "OPEN")
-        self._fire_event_ok(cmd_id, evname)
+            self.status.plate_detected = False
+            self.status.gripper_home = True
+        self._fire_event_ok(cmd_id, "DEPOSIT_DONE")
+        self._fire_state(EspState.READY)
 
     def _async_door_arm(self, cmd_id: int, pos: str, evname: str):
         time.sleep(self._mech_dauer_s)
         with self._lock:
             self.status.door_arm_home = (pos == "CLOSED")
-            if self.tuer_offen_wenn_arm_aus:
-                self.status.door_open = (pos == "OPEN")
+            if pos == "OPEN":
+                # Türsensor: Tür offen wenn Arm ausfährt (außer im Fehler-Test)
+                self.status.door_open = self.tuer_offen_wenn_arm_aus
+            # Bei CLOSED: door_open bleibt True (offener Raum nach dem Wegfahren)
         self._fire_event_ok(cmd_id, evname)

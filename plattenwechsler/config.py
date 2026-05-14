@@ -21,6 +21,8 @@ logger = logging.getLogger(__name__)
 class Position:
     x: int
     z: int
+    gripper_depth: int = 120
+    lift_offset: int = 8
 
 
 class Config:
@@ -51,7 +53,11 @@ class Config:
         p = self.get("positionen", name)
         if not p:
             return None
-        return Position(x=int(p["x"]), z=int(p["z"]))
+        return Position(
+            x=int(p["x"]), z=int(p["z"]),
+            gripper_depth=int(p.get("gripper_depth", 120)),
+            lift_offset=int(p.get("lift_offset", 8)),
+        )
 
     # ---------- Drucker-Liste ----------
     def drucker_liste(self) -> List[DruckerConfig]:

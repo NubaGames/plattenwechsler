@@ -1,7 +1,7 @@
 """Datentypen, Enums und Konstanten für den Plattenwechsler.
 
 Schnittstellen-Stand: Mai 2026 (TF-Luna Hindernissensor + VL53L0X Türsensor
-am Schlitten, Türarm-Hebel und Halteservo am Schlitten).
+am Schlitten, Türarm-Hebel; PICKUP/DEPOSIT steuern Greifer+Z-Hub intern).
 """
 from __future__ import annotations
 from dataclasses import dataclass, field
@@ -24,17 +24,14 @@ class EspState(Enum):
     NOT_REFERENCED = "NOT_REFERENCED"
     READY = "READY"
     BUSY_HOMING = "BUSY_HOMING"
+    BUSY_SCANNING = "BUSY_SCANNING"
     BUSY_MOVING = "BUSY_MOVING"
     BUSY_MOVE_HOME = "BUSY_MOVE_HOME"
+    BUSY_PICKUP = "BUSY_PICKUP"
+    BUSY_DEPOSIT = "BUSY_DEPOSIT"
     STOPPED = "STOPPED"
     ERROR = "ERROR"
     UNKNOWN = "UNKNOWN"
-
-
-class ClampPosition(Enum):
-    OPEN = "OPEN"
-    CLOSED = "CLOSED"
-    SERVICE = "SERVICE"
 
 
 class DoorArmPosition(Enum):
@@ -65,6 +62,8 @@ ESP_ERROR_TO_CLASS = {
     "SENSOR_FAULT_OBSTACLE": ErrorClass.SENSORFEHLER,
     "SENSOR_FAULT_GRIPPER":  ErrorClass.SENSORFEHLER,
     "DRIVER_FAULT":          ErrorClass.FAHRFEHLER,
+    "PLATE_NOT_DETECTED":    ErrorClass.ENTNAHMEFEHLER,
+    "DOOR_NOT_OPEN":         ErrorClass.TUERFEHLER,
 }
 
 
@@ -105,6 +104,8 @@ class DruckerConfig:
     pos_z_tuer: int = 0
     pos_z_druckbett: int = 0
     door_arm_hub_mm: int = 50
+    gripper_depth: int = 120
+    lift_offset: int = 8
 
     def to_dict(self) -> dict:
         return {
@@ -112,6 +113,7 @@ class DruckerConfig:
             "pos_x": self.pos_x, "pos_z_anfahr": self.pos_z_anfahr,
             "pos_z_tuer": self.pos_z_tuer, "pos_z_druckbett": self.pos_z_druckbett,
             "door_arm_hub_mm": self.door_arm_hub_mm,
+            "gripper_depth": self.gripper_depth, "lift_offset": self.lift_offset,
         }
 
     @classmethod
@@ -125,6 +127,8 @@ class DruckerConfig:
             pos_z_tuer=int(d.get("pos_z_tuer", 0)),
             pos_z_druckbett=int(d.get("pos_z_druckbett", 0)),
             door_arm_hub_mm=int(d.get("door_arm_hub_mm", 50)),
+            gripper_depth=int(d.get("gripper_depth", 120)),
+            lift_offset=int(d.get("lift_offset", 8)),
         )
 
 
@@ -146,6 +150,7 @@ class EspStatus:
     door_open: bool = False        # einzelner Bool — Tür des angefahrenen Druckers
     door_dist_mm: int = 0           # Rohwert VL53L0X (Debug)
 
+    plate_detected: bool = False     # ESP-Sensor: Platte liegt auf der Gabel
     last_update: float = 0.0
     has_plate: bool = False         # Pi-intern (während Plattenwechsel)
 
