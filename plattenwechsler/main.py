@@ -78,11 +78,18 @@ def main() -> int:
                 qos=cfg.get("mqtt", "qos", default=1),
                 retain_status=cfg.get("mqtt", "retain_status", default=True),
             )
-            mqtt_client.on_befehl_auftrag = lambda did: hauptablauf.auftrag_aufnehmen(
-                did, AuftragQuelle.MQTT)
+            def _on_auftrag_mqtt(did):
+                ok = hauptablauf.auftrag_aufnehmen(did, AuftragQuelle.MQTT)
+                mqtt_client.publish_response(
+                    "auftrag", ok,
+                    f"Drucker {did} in Queue" if ok
+                    else f"Drucker {did}: abgelehnt (bereits in Queue oder System nicht bereit)")
+            mqtt_client.on_befehl_auftrag = _on_auftrag_mqtt
             mqtt_client.on_befehl_quittieren = fehler.quittieren
             mqtt_client.on_befehl_referenzfahrt = hauptablauf.manuelle_referenzfahrt
             mqtt_client.on_befehl_stop = lambda: _safe(esp.stop_motors)
+            mqtt_client.on_befehl_status_request = \
+                lambda: _force_mqtt_publish(mqtt_client, hauptablauf)
 
             def _modus(aktiv):
                 if aktiv: hauptablauf.service_modus_aktivieren()
@@ -225,6 +232,17 @@ def _telegram_status_text(ha: Hauptablauf) -> str:
     if f:
         txt += f"\n🚨 {f['klasse']} – {f['nachricht']}"
     return txt
+
+
+def _force_mqtt_publish(mqtt_client, hauptablauf: Hauptablauf):
+    try:
+        snap = hauptablauf.status_snapshot()
+        mqtt_client.publish_status(snap)
+        mqtt_client.publish_esp_status(snap["esp"])
+        for did, status in snap["drucker_status"].items():
+            mqtt_client.publish_drucker_status(did, {"drucker_id": did, "status": status})
+    except Exception:
+        logger.exception("force_mqtt_publish")
 
 
 def _start_mqtt_publisher(mqtt_client, hauptablauf: Hauptablauf,

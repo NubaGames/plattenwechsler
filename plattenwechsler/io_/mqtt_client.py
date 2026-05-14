@@ -11,11 +11,15 @@ Topics:
     plattenwechsler/error                    JSON
     plattenwechsler/event/auftrag            JSON
 
+  Antworten:
+    plattenwechsler/response                 JSON {"cmd":..., "ok":..., "msg":...}
+
   Befehle:
     plattenwechsler/cmd/auftrag              {"drucker_id": N}
     plattenwechsler/cmd/quittieren           (leer)
     plattenwechsler/cmd/referenzfahrt        (leer)
     plattenwechsler/cmd/stop                 (leer)
+    plattenwechsler/cmd/status_request       (leer) — erzwingt sofortige Status-Veröffentlichung
     plattenwechsler/cmd/service/modus        {"aktiv": true}
     plattenwechsler/cmd/service/fahre        {"ziel": "home"|"ablage"|"magazin"}
     plattenwechsler/cmd/service/drucker      {"drucker_id": N}
@@ -57,6 +61,7 @@ class MqttClient:
         self.on_befehl_quittieren: Optional[Callable[[], None]] = None
         self.on_befehl_referenzfahrt: Optional[Callable[[], None]] = None
         self.on_befehl_stop: Optional[Callable[[], None]] = None
+        self.on_befehl_status_request: Optional[Callable[[], None]] = None
         self.on_befehl_service_modus: Optional[Callable[[bool], None]] = None
         self.on_befehl_service_fahre: Optional[Callable[[str], None]] = None
         self.on_befehl_service_drucker: Optional[Callable[[int], None]] = None
@@ -112,6 +117,7 @@ class MqttClient:
                 f"{self._base}/cmd/quittieren",
                 f"{self._base}/cmd/referenzfahrt",
                 f"{self._base}/cmd/stop",
+                f"{self._base}/cmd/status_request",
                 f"{self._base}/cmd/service/modus",
                 f"{self._base}/cmd/service/fahre",
                 f"{self._base}/cmd/service/drucker",
@@ -137,27 +143,58 @@ class MqttClient:
             if topic.endswith("/cmd/auftrag"):
                 if self.on_befehl_auftrag and int(data.get("drucker_id", 0)) > 0:
                     self.on_befehl_auftrag(int(data["drucker_id"]))
-            elif topic.endswith("/cmd/quittieren") and self.on_befehl_quittieren:
-                self.on_befehl_quittieren()
-            elif topic.endswith("/cmd/referenzfahrt") and self.on_befehl_referenzfahrt:
-                self.on_befehl_referenzfahrt()
-            elif topic.endswith("/cmd/stop") and self.on_befehl_stop:
-                self.on_befehl_stop()
-            elif topic.endswith("/cmd/service/modus") and self.on_befehl_service_modus:
-                self.on_befehl_service_modus(bool(data.get("aktiv", False)))
-            elif topic.endswith("/cmd/service/fahre") and self.on_befehl_service_fahre:
-                if data.get("ziel"):
+                else:
+                    self.publish_response("auftrag", False, "Ungültige drucker_id")
+            elif topic.endswith("/cmd/quittieren"):
+                if self.on_befehl_quittieren:
+                    self.on_befehl_quittieren()
+                    self.publish_response("quittieren", True, "Fehler quittiert")
+            elif topic.endswith("/cmd/referenzfahrt"):
+                if self.on_befehl_referenzfahrt:
+                    self.on_befehl_referenzfahrt()
+                    self.publish_response("referenzfahrt", True, "Referenzfahrt gestartet")
+            elif topic.endswith("/cmd/stop"):
+                if self.on_befehl_stop:
+                    self.on_befehl_stop()
+                    self.publish_response("stop", True, "Motoren gestoppt")
+            elif topic.endswith("/cmd/status_request"):
+                if self.on_befehl_status_request:
+                    self.on_befehl_status_request()
+            elif topic.endswith("/cmd/service/modus"):
+                if self.on_befehl_service_modus:
+                    aktiv = bool(data.get("aktiv", False))
+                    self.on_befehl_service_modus(aktiv)
+                    self.publish_response("service/modus", True,
+                                          "Service aktiviert" if aktiv else "Service beendet")
+            elif topic.endswith("/cmd/service/fahre"):
+                if self.on_befehl_service_fahre and data.get("ziel"):
                     self.on_befehl_service_fahre(str(data["ziel"]))
-            elif topic.endswith("/cmd/service/drucker") and self.on_befehl_service_drucker:
-                if int(data.get("drucker_id", 0)) > 0:
+                    self.publish_response("service/fahre", True,
+                                          f"Fahre zu: {data['ziel']}")
+            elif topic.endswith("/cmd/service/drucker"):
+                if self.on_befehl_service_drucker and int(data.get("drucker_id", 0)) > 0:
                     self.on_befehl_service_drucker(int(data["drucker_id"]))
-            elif topic.endswith("/cmd/drucker/setzen") and self.on_befehl_drucker_setzen:
-                self.on_befehl_drucker_setzen(data)
-            elif topic.endswith("/cmd/drucker/entfernen") and self.on_befehl_drucker_entfernen:
-                if int(data.get("id", 0)) > 0:
+                    self.publish_response("service/drucker", True,
+                                          f"Fahre zu Drucker {data['drucker_id']}")
+            elif topic.endswith("/cmd/drucker/setzen"):
+                if self.on_befehl_drucker_setzen:
+                    self.on_befehl_drucker_setzen(data)
+                    self.publish_response("drucker/setzen", True,
+                                          f"Drucker {data.get('id', '?')} gespeichert")
+            elif topic.endswith("/cmd/drucker/entfernen"):
+                if self.on_befehl_drucker_entfernen and int(data.get("id", 0)) > 0:
                     self.on_befehl_drucker_entfernen(int(data["id"]))
+                    self.publish_response("drucker/entfernen", True,
+                                          f"Drucker {data['id']} entfernt")
         except Exception:
             logger.exception("MQTT-Befehl")
+            self.publish_response(topic.split("/cmd/")[-1], False, "Interner Fehler")
+
+    def publish_response(self, cmd: str, ok: bool, msg: str = ""):
+        import time as _t
+        self._publish_safe(f"{self._base}/response", {
+            "cmd": cmd, "ok": ok, "msg": msg, "ts": round(_t.time(), 3),
+        }, retain=False)
 
     def _publish_safe(self, topic: str, payload, retain: bool = False):
         if not self._connected:
