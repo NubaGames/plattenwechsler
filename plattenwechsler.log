@@ -4527,3 +4527,439 @@
 2026-05-14 11:55:02 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=1820000;state=READY;x=0;z=0
 2026-05-14 11:55:03 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=1821000;state=READY;x=0;z=0
 2026-05-14 11:55:04 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=1822000;state=READY;x=0;z=0
+2026-05-14 11:57:52 [INFO   ] main: === Plattenwechsler startet ===
+2026-05-14 11:57:52 [INFO   ] plattenwechsler.io_.gpio_manager: GPIO bereit (4 Drucker-Taster)
+2026-05-14 11:57:52 [INFO   ] plattenwechsler.io_.gpio_manager: Not-Aus an Pin 26 aktiv
+2026-05-14 11:57:53 [INFO   ] plattenwechsler.io_.esp_client: ESP verbunden: /dev/ttyUSB0 @ 115200
+2026-05-14 11:57:53 [INFO   ] plattenwechsler.io_.mqtt_client: MQTT verbinde mit localhost:1883
+2026-05-14 11:57:53 [INFO   ] plattenwechsler.io_.mqtt_client: MQTT verbunden
+2026-05-14 11:57:53 [INFO   ] plattenwechsler.io_.telegram_client: Telegram-Bot @plattenwechsler_bot verbunden
+2026-05-14 11:57:53 [INFO   ] plattenwechsler.core.hauptablauf: Hauptablauf gestartet
+2026-05-14 11:57:53 [INFO   ] plattenwechsler.core.hauptablauf: Init: warte auf ESP …
+2026-05-14 11:57:54 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=1992000;state=READY;x=0;z=0
+2026-05-14 11:57:54 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;1;PING
+2026-05-14 11:57:54 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;1;ACK
+2026-05-14 11:57:54 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;1;OK;PONG;x=0;z=0
+2026-05-14 11:57:54 [INFO   ] plattenwechsler.core.hauptablauf: Systemzustand: INIT → REFERENZFAHRT
+2026-05-14 11:57:54 [INFO   ] plattenwechsler.core.hauptablauf: Referenzfahrt
+2026-05-14 11:57:54 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;2;HOME
+2026-05-14 11:57:55 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;2;ACK
+2026-05-14 11:57:55 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;BUSY_HOMING;ref=0;x=0;z=0
+2026-05-14 11:57:55 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=1993000;state=BUSY_HOMING;x=0;z=0
+2026-05-14 11:57:56 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=1994000;state=BUSY_HOMING;x=-3;z=0
+2026-05-14 11:57:57 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=1995000;state=BUSY_HOMING;x=-5;z=0
+2026-05-14 11:57:58 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=1996000;state=BUSY_HOMING;x=-8;z=0
+2026-05-14 11:57:59 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=1997000;state=BUSY_HOMING;x=-10;z=0
+2026-05-14 11:57:59 [INFO   ] plattenwechsler.io_.gpio_manager: Endschalter X ausgelöst
+2026-05-14 11:57:59 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;3;HOME_SWITCH_HIT;axis=X
+2026-05-14 11:58:00 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;3;ACK
+2026-05-14 11:58:00 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=1998000;state=BUSY_HOMING;x=0;z=0
+2026-05-14 11:58:01 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=1999000;state=BUSY_HOMING;x=0;z=-3
+2026-05-14 11:58:01 [INFO   ] plattenwechsler.io_.gpio_manager: Endschalter Z ausgelöst
+2026-05-14 11:58:01 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;4;HOME_SWITCH_HIT;axis=Z
+2026-05-14 11:58:01 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;4;ACK
+2026-05-14 11:58:01 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;2;OK;HOME_DONE;x=0;z=0
+2026-05-14 11:58:01 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;READY;ref=1;x=0;z=0
+2026-05-14 11:58:01 [INFO   ] plattenwechsler.core.hauptablauf: Systemzustand: REFERENZFAHRT → BEREITSCHAFT
+2026-05-14 11:58:02 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2000000;state=READY;x=0;z=0
+2026-05-14 11:58:03 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2001000;state=READY;x=0;z=0
+2026-05-14 11:58:04 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2002000;state=READY;x=0;z=0
+2026-05-14 11:58:04 [INFO   ] plattenwechsler.core.hauptablauf: Systemzustand: BEREITSCHAFT → PLATTENWECHSEL
+2026-05-14 11:58:04 [INFO   ] plattenwechsler.core.hauptablauf: Plattenwechsel start: Auftrag#1(Drucker=1, Quelle=Touchdisplay)
+2026-05-14 11:58:04 [INFO   ] plattenwechsler.core.hauptablauf: MOVE_TO Drucker 1 Anfahrt (x=100 z=200)
+2026-05-14 11:58:04 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;5;MOVE_TO;x=100;z=200
+2026-05-14 11:58:04 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;5;ACK
+2026-05-14 11:58:04 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;BUSY_SCANNING;ref=1;x=0;z=0
+2026-05-14 11:58:05 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2003000;state=BUSY_SCANNING;x=0;z=1
+2026-05-14 11:58:06 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2004000;state=BUSY_SCANNING;x=0;z=6
+2026-05-14 11:58:07 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2005000;state=BUSY_SCANNING;x=0;z=19
+2026-05-14 11:58:08 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2006000;state=BUSY_SCANNING;x=0;z=44
+2026-05-14 11:58:09 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2007000;state=BUSY_SCANNING;x=0;z=69
+2026-05-14 11:58:10 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2008000;state=BUSY_SCANNING;x=0;z=94
+2026-05-14 11:58:11 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2009000;state=BUSY_SCANNING;x=0;z=119
+2026-05-14 11:58:12 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2010000;state=BUSY_SCANNING;x=0;z=144
+2026-05-14 11:58:13 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2011000;state=BUSY_SCANNING;x=0;z=169
+2026-05-14 11:58:14 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2012000;state=BUSY_SCANNING;x=0;z=188
+2026-05-14 11:58:15 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2013000;state=BUSY_SCANNING;x=0;z=196
+2026-05-14 11:58:16 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2014000;state=BUSY_SCANNING;x=0;z=199
+2026-05-14 11:58:16 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;BUSY_MOVING;ref=1;x=0;z=200
+2026-05-14 11:58:17 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2015000;state=BUSY_MOVING;x=2;z=200
+2026-05-14 11:58:18 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2016000;state=BUSY_MOVING;x=8;z=200
+2026-05-14 11:58:19 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2017000;state=BUSY_MOVING;x=24;z=200
+2026-05-14 11:58:20 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2018000;state=BUSY_MOVING;x=49;z=200
+2026-05-14 11:58:21 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2019000;state=BUSY_MOVING;x=74;z=200
+2026-05-14 11:58:22 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2020000;state=BUSY_MOVING;x=91;z=200
+2026-05-14 11:58:23 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2021000;state=BUSY_MOVING;x=97;z=200
+2026-05-14 11:58:24 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;5;OK;MOVE_DONE;x=100;z=200
+2026-05-14 11:58:24 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;READY;ref=1;x=100;z=200
+2026-05-14 11:58:24 [INFO   ] plattenwechsler.core.hauptablauf: MOVE_TO Drucker 1 Tür-Höhe (x=100 z=220)
+2026-05-14 11:58:24 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;6;MOVE_TO;x=100;z=220
+2026-05-14 11:58:24 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;6;ACK
+2026-05-14 11:58:24 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;BUSY_MOVING;ref=1;x=100;z=200
+2026-05-14 11:58:24 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2022000;state=BUSY_MOVING;x=100;z=200
+2026-05-14 11:58:25 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2023000;state=BUSY_MOVING;x=100;z=206
+2026-05-14 11:58:26 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2024000;state=BUSY_MOVING;x=100;z=219
+2026-05-14 11:58:26 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;6;OK;MOVE_DONE;x=100;z=220
+2026-05-14 11:58:26 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;READY;ref=1;x=100;z=220
+2026-05-14 11:58:26 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;7;SET_DOOR_ARM;position=OPEN
+2026-05-14 11:58:26 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;7;ACK
+2026-05-14 11:58:26 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;7;OK;DOOR_ARM_OPEN;x=100;z=220
+2026-05-14 11:58:27 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;8;STATUS
+2026-05-14 11:58:27 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;8;ACK
+2026-05-14 11:58:27 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATUS;state=READY;error=NONE;ref=1;x=100;z=220;target_x=100;target_z=220;busy=0;gripper_home=0;door_arm_home=0;obstacle_ok=1;door_open=1;door_dist_mm=36
+2026-05-14 11:58:27 [INFO   ] plattenwechsler.core.hauptablauf: MOVE_TO Drucker 1 Druckbett (x=100 z=50)
+2026-05-14 11:58:27 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;9;MOVE_TO;x=100;z=50
+2026-05-14 11:58:27 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;9;ACK
+2026-05-14 11:58:27 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;BUSY_MOVING;ref=1;x=100;z=220
+2026-05-14 11:58:27 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2025000;state=BUSY_MOVING;x=100;z=219
+2026-05-14 11:58:28 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2026000;state=BUSY_MOVING;x=100;z=217
+2026-05-14 11:58:29 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2027000;state=BUSY_MOVING;x=100;z=209
+2026-05-14 11:58:30 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2028000;state=BUSY_MOVING;x=100;z=191
+2026-05-14 11:58:31 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2029000;state=BUSY_MOVING;x=100;z=166
+2026-05-14 11:58:32 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2030000;state=BUSY_MOVING;x=100;z=141
+2026-05-14 11:58:33 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2031000;state=BUSY_MOVING;x=100;z=116
+2026-05-14 11:58:34 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2032000;state=BUSY_MOVING;x=100;z=91
+2026-05-14 11:58:35 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2033000;state=BUSY_MOVING;x=100;z=67
+2026-05-14 11:58:36 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2034000;state=BUSY_MOVING;x=100;z=55
+2026-05-14 11:58:37 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2035000;state=BUSY_MOVING;x=100;z=51
+2026-05-14 11:58:37 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;9;OK;MOVE_DONE;x=100;z=50
+2026-05-14 11:58:37 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;READY;ref=1;x=100;z=50
+2026-05-14 11:58:37 [INFO   ] plattenwechsler.core.hauptablauf: SET_CLAMP CLOSED (Platte greifen)
+2026-05-14 11:58:37 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;10;SET_CLAMP;position=CLOSED
+2026-05-14 11:58:38 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;10;ACK
+2026-05-14 11:58:38 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;10;OK;CLAMP_CLOSED;x=100;z=50
+2026-05-14 11:58:38 [INFO   ] plattenwechsler.core.hauptablauf: MOVE_TO Drucker 1 Tür-Höhe (raus) (x=100 z=220)
+2026-05-14 11:58:38 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;11;MOVE_TO;x=100;z=220
+2026-05-14 11:58:38 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;11;ACK
+2026-05-14 11:58:38 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;BUSY_MOVING;ref=1;x=100;z=50
+2026-05-14 11:58:38 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2036000;state=BUSY_MOVING;x=100;z=50
+2026-05-14 11:58:39 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2037000;state=BUSY_MOVING;x=100;z=53
+2026-05-14 11:58:40 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2038000;state=BUSY_MOVING;x=100;z=62
+2026-05-14 11:58:41 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2039000;state=BUSY_MOVING;x=100;z=83
+2026-05-14 11:58:42 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2040000;state=BUSY_MOVING;x=100;z=108
+2026-05-14 11:58:43 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2041000;state=BUSY_MOVING;x=100;z=133
+2026-05-14 11:58:44 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2042000;state=BUSY_MOVING;x=100;z=158
+2026-05-14 11:58:45 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2043000;state=BUSY_MOVING;x=100;z=183
+2026-05-14 11:58:46 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2044000;state=BUSY_MOVING;x=100;z=205
+2026-05-14 11:58:47 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2045000;state=BUSY_MOVING;x=100;z=215
+2026-05-14 11:58:48 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2046000;state=BUSY_MOVING;x=100;z=219
+2026-05-14 11:58:48 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;11;OK;MOVE_DONE;x=100;z=220
+2026-05-14 11:58:48 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;READY;ref=1;x=100;z=220
+2026-05-14 11:58:48 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;12;SET_DOOR_ARM;position=CLOSED
+2026-05-14 11:58:48 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;12;ACK
+2026-05-14 11:58:48 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;12;OK;DOOR_ARM_CLOSED;x=100;z=220
+2026-05-14 11:58:48 [INFO   ] plattenwechsler.core.hauptablauf: MOVE_TO Ablage (x=20 z=20)
+2026-05-14 11:58:48 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;13;MOVE_TO;x=20;z=20
+2026-05-14 11:58:48 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;13;ACK
+2026-05-14 11:58:48 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;BUSY_MOVING;ref=1;x=100;z=220
+2026-05-14 11:58:49 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2047000;state=BUSY_MOVING;x=98;z=218
+2026-05-14 11:58:50 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2048000;state=BUSY_MOVING;x=94;z=214
+2026-05-14 11:58:51 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2049000;state=BUSY_MOVING;x=82;z=202
+2026-05-14 11:58:52 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2050000;state=BUSY_MOVING;x=59;z=179
+2026-05-14 11:58:53 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2051000;state=BUSY_MOVING;x=36;z=154
+2026-05-14 11:58:54 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2052000;state=BUSY_MOVING;x=25;z=129
+2026-05-14 11:58:55 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2053000;state=BUSY_MOVING;x=20;z=104
+2026-05-14 11:58:56 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2054000;state=BUSY_MOVING;x=20;z=79
+2026-05-14 11:58:57 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2055000;state=BUSY_MOVING;x=20;z=54
+2026-05-14 11:58:58 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2056000;state=BUSY_MOVING;x=20;z=33
+2026-05-14 11:58:59 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2057000;state=BUSY_MOVING;x=20;z=24
+2026-05-14 11:59:00 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2058000;state=BUSY_MOVING;x=20;z=20
+2026-05-14 11:59:00 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;13;OK;MOVE_DONE;x=20;z=20
+2026-05-14 11:59:00 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;READY;ref=1;x=20;z=20
+2026-05-14 11:59:00 [INFO   ] plattenwechsler.core.hauptablauf: SET_CLAMP OPEN (Platte ablegen)
+2026-05-14 11:59:00 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;14;SET_CLAMP;position=OPEN
+2026-05-14 11:59:00 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;14;ACK
+2026-05-14 11:59:00 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;14;OK;CLAMP_OPEN;x=20;z=20
+2026-05-14 11:59:00 [INFO   ] plattenwechsler.core.hauptablauf: MOVE_TO Magazin (x=50 z=50)
+2026-05-14 11:59:00 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;15;MOVE_TO;x=50;z=50
+2026-05-14 11:59:00 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;15;ACK
+2026-05-14 11:59:00 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;BUSY_MOVING;ref=1;x=20;z=20
+2026-05-14 11:59:01 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2059000;state=BUSY_MOVING;x=21;z=21
+2026-05-14 11:59:02 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2060000;state=BUSY_MOVING;x=31;z=31
+2026-05-14 11:59:03 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2061000;state=BUSY_MOVING;x=46;z=46
+2026-05-14 11:59:04 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;15;OK;MOVE_DONE;x=50;z=50
+2026-05-14 11:59:04 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;READY;ref=1;x=50;z=50
+2026-05-14 11:59:04 [INFO   ] plattenwechsler.core.hauptablauf: SET_CLAMP CLOSED (Platte aus Magazin)
+2026-05-14 11:59:04 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;16;SET_CLAMP;position=CLOSED
+2026-05-14 11:59:04 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;16;ACK
+2026-05-14 11:59:04 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;16;OK;CLAMP_CLOSED;x=50;z=50
+2026-05-14 11:59:04 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2062000;state=READY;x=50;z=50
+2026-05-14 11:59:04 [INFO   ] plattenwechsler.core.hauptablauf: MOVE_TO Drucker 1 Anfahrt (x=100 z=200)
+2026-05-14 11:59:04 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;17;MOVE_TO;x=100;z=200
+2026-05-14 11:59:04 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;17;ACK
+2026-05-14 11:59:04 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;BUSY_MOVING;ref=1;x=50;z=50
+2026-05-14 11:59:05 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2063000;state=BUSY_MOVING;x=52;z=52
+2026-05-14 11:59:06 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2064000;state=BUSY_MOVING;x=59;z=59
+2026-05-14 11:59:07 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2065000;state=BUSY_MOVING;x=76;z=76
+2026-05-14 11:59:08 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2066000;state=BUSY_MOVING;x=91;z=101
+2026-05-14 11:59:09 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2067000;state=BUSY_MOVING;x=97;z=126
+2026-05-14 11:59:10 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2068000;state=BUSY_MOVING;x=100;z=151
+2026-05-14 11:59:11 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2069000;state=BUSY_MOVING;x=100;z=176
+2026-05-14 11:59:12 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2070000;state=BUSY_MOVING;x=100;z=191
+2026-05-14 11:59:13 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2071000;state=BUSY_MOVING;x=100;z=197
+2026-05-14 11:59:14 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;17;OK;MOVE_DONE;x=100;z=200
+2026-05-14 11:59:14 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;READY;ref=1;x=100;z=200
+2026-05-14 11:59:14 [INFO   ] plattenwechsler.core.hauptablauf: MOVE_TO Drucker 1 Tür-Höhe (x=100 z=220)
+2026-05-14 11:59:14 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;18;MOVE_TO;x=100;z=220
+2026-05-14 11:59:14 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;18;ACK
+2026-05-14 11:59:14 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;BUSY_MOVING;ref=1;x=100;z=200
+2026-05-14 11:59:14 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2072000;state=BUSY_MOVING;x=100;z=200
+2026-05-14 11:59:15 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2073000;state=BUSY_MOVING;x=100;z=208
+2026-05-14 11:59:16 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2074000;state=BUSY_MOVING;x=100;z=219
+2026-05-14 11:59:16 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;18;OK;MOVE_DONE;x=100;z=220
+2026-05-14 11:59:16 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;READY;ref=1;x=100;z=220
+2026-05-14 11:59:16 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;19;SET_DOOR_ARM;position=OPEN
+2026-05-14 11:59:16 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;19;ACK
+2026-05-14 11:59:16 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;19;OK;DOOR_ARM_OPEN;x=100;z=220
+2026-05-14 11:59:16 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;20;STATUS
+2026-05-14 11:59:17 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;20;ACK
+2026-05-14 11:59:17 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATUS;state=READY;error=NONE;ref=1;x=100;z=220;target_x=100;target_z=220;busy=0;gripper_home=0;door_arm_home=0;obstacle_ok=1;door_open=1;door_dist_mm=35
+2026-05-14 11:59:17 [INFO   ] plattenwechsler.core.hauptablauf: MOVE_TO Drucker 1 Druckbett (x=100 z=50)
+2026-05-14 11:59:17 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;21;MOVE_TO;x=100;z=50
+2026-05-14 11:59:17 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;21;ACK
+2026-05-14 11:59:17 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;BUSY_MOVING;ref=1;x=100;z=220
+2026-05-14 11:59:17 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2075000;state=BUSY_MOVING;x=100;z=219
+2026-05-14 11:59:18 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2076000;state=BUSY_MOVING;x=100;z=216
+2026-05-14 11:59:19 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2077000;state=BUSY_MOVING;x=100;z=208
+2026-05-14 11:59:20 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2078000;state=BUSY_MOVING;x=100;z=188
+2026-05-14 11:59:21 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2079000;state=BUSY_MOVING;x=100;z=163
+2026-05-14 11:59:22 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2080000;state=BUSY_MOVING;x=100;z=138
+2026-05-14 11:59:23 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2081000;state=BUSY_MOVING;x=100;z=113
+2026-05-14 11:59:24 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2082000;state=BUSY_MOVING;x=100;z=88
+2026-05-14 11:59:25 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2083000;state=BUSY_MOVING;x=100;z=65
+2026-05-14 11:59:26 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2084000;state=BUSY_MOVING;x=100;z=55
+2026-05-14 11:59:27 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2085000;state=BUSY_MOVING;x=100;z=50
+2026-05-14 11:59:27 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;21;OK;MOVE_DONE;x=100;z=50
+2026-05-14 11:59:27 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;READY;ref=1;x=100;z=50
+2026-05-14 11:59:27 [INFO   ] plattenwechsler.core.hauptablauf: SET_CLAMP OPEN (Platte einsetzen)
+2026-05-14 11:59:27 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;22;SET_CLAMP;position=OPEN
+2026-05-14 11:59:27 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;22;ACK
+2026-05-14 11:59:27 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;22;OK;CLAMP_OPEN;x=100;z=50
+2026-05-14 11:59:27 [INFO   ] plattenwechsler.core.hauptablauf: MOVE_TO Drucker 1 Tür-Höhe (raus) (x=100 z=220)
+2026-05-14 11:59:27 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;23;MOVE_TO;x=100;z=220
+2026-05-14 11:59:28 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;23;ACK
+2026-05-14 11:59:28 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;BUSY_MOVING;ref=1;x=100;z=50
+2026-05-14 11:59:28 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2086000;state=BUSY_MOVING;x=100;z=50
+2026-05-14 11:59:29 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2087000;state=BUSY_MOVING;x=100;z=54
+2026-05-14 11:59:30 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2088000;state=BUSY_MOVING;x=100;z=64
+2026-05-14 11:59:31 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2089000;state=BUSY_MOVING;x=100;z=86
+2026-05-14 11:59:32 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2090000;state=BUSY_MOVING;x=100;z=111
+2026-05-14 11:59:33 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2091000;state=BUSY_MOVING;x=100;z=136
+2026-05-14 11:59:34 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2092000;state=BUSY_MOVING;x=100;z=161
+2026-05-14 11:59:35 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2093000;state=BUSY_MOVING;x=100;z=186
+2026-05-14 11:59:36 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2094000;state=BUSY_MOVING;x=100;z=207
+2026-05-14 11:59:37 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2095000;state=BUSY_MOVING;x=100;z=216
+2026-05-14 11:59:38 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2096000;state=BUSY_MOVING;x=100;z=219
+2026-05-14 11:59:38 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;23;OK;MOVE_DONE;x=100;z=220
+2026-05-14 11:59:38 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;READY;ref=1;x=100;z=220
+2026-05-14 11:59:38 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;24;SET_DOOR_ARM;position=CLOSED
+2026-05-14 11:59:38 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;24;ACK
+2026-05-14 11:59:38 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;24;OK;DOOR_ARM_CLOSED;x=100;z=220
+2026-05-14 11:59:38 [INFO   ] plattenwechsler.core.hauptablauf: Weitere Aufträge in Queue — Heimfahrt übersprungen
+2026-05-14 11:59:38 [INFO   ] plattenwechsler.core.hauptablauf: Plattenwechsel Auftrag#1(Drucker=1, Quelle=Touchdisplay) erfolgreich
+2026-05-14 11:59:38 [INFO   ] plattenwechsler.core.hauptablauf: Systemzustand: PLATTENWECHSEL → BEREITSCHAFT
+2026-05-14 11:59:38 [INFO   ] plattenwechsler.core.hauptablauf: Systemzustand: BEREITSCHAFT → PLATTENWECHSEL
+2026-05-14 11:59:38 [INFO   ] plattenwechsler.core.hauptablauf: Plattenwechsel start: Auftrag#2(Drucker=2, Quelle=Touchdisplay)
+2026-05-14 11:59:38 [INFO   ] plattenwechsler.core.hauptablauf: MOVE_TO Drucker 2 Anfahrt (x=200 z=200)
+2026-05-14 11:59:38 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;25;MOVE_TO;x=200;z=200
+2026-05-14 11:59:38 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;25;ACK
+2026-05-14 11:59:38 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;BUSY_MOVING;ref=1;x=100;z=220
+2026-05-14 11:59:39 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2097000;state=BUSY_MOVING;x=101;z=217
+2026-05-14 11:59:40 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2098000;state=BUSY_MOVING;x=106;z=202
+2026-05-14 11:59:41 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2099000;state=BUSY_MOVING;x=118;z=200
+2026-05-14 11:59:42 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2100000;state=BUSY_MOVING;x=143;z=200
+2026-05-14 11:59:43 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2101000;state=BUSY_MOVING;x=168;z=200
+2026-05-14 11:59:44 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2102000;state=BUSY_MOVING;x=188;z=200
+2026-05-14 11:59:45 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2103000;state=BUSY_MOVING;x=196;z=200
+2026-05-14 11:59:46 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2104000;state=BUSY_MOVING;x=199;z=200
+2026-05-14 11:59:46 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;25;OK;MOVE_DONE;x=200;z=200
+2026-05-14 11:59:46 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;READY;ref=1;x=200;z=200
+2026-05-14 11:59:46 [INFO   ] plattenwechsler.core.hauptablauf: MOVE_TO Drucker 2 Tür-Höhe (x=200 z=220)
+2026-05-14 11:59:46 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;26;MOVE_TO;x=200;z=220
+2026-05-14 11:59:46 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;26;ACK
+2026-05-14 11:59:46 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;BUSY_MOVING;ref=1;x=200;z=200
+2026-05-14 11:59:47 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2105000;state=BUSY_MOVING;x=200;z=203
+2026-05-14 11:59:48 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2106000;state=BUSY_MOVING;x=200;z=218
+2026-05-14 11:59:48 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;26;OK;MOVE_DONE;x=200;z=220
+2026-05-14 11:59:48 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;READY;ref=1;x=200;z=220
+2026-05-14 11:59:48 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;27;SET_DOOR_ARM;position=OPEN
+2026-05-14 11:59:48 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;27;ACK
+2026-05-14 11:59:48 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;27;OK;DOOR_ARM_OPEN;x=200;z=220
+2026-05-14 11:59:49 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;28;STATUS
+2026-05-14 11:59:49 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2107000;state=READY;x=200;z=220
+2026-05-14 11:59:49 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;28;ACK
+2026-05-14 11:59:49 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATUS;state=READY;error=NONE;ref=1;x=200;z=220;target_x=200;target_z=220;busy=0;gripper_home=0;door_arm_home=0;obstacle_ok=1;door_open=1;door_dist_mm=39
+2026-05-14 11:59:49 [INFO   ] plattenwechsler.core.hauptablauf: MOVE_TO Drucker 2 Druckbett (x=200 z=50)
+2026-05-14 11:59:49 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;29;MOVE_TO;x=200;z=50
+2026-05-14 11:59:49 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;29;ACK
+2026-05-14 11:59:49 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;BUSY_MOVING;ref=1;x=200;z=220
+2026-05-14 11:59:50 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2108000;state=BUSY_MOVING;x=200;z=217
+2026-05-14 11:59:51 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2109000;state=BUSY_MOVING;x=200;z=211
+2026-05-14 11:59:52 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2110000;state=BUSY_MOVING;x=200;z=196
+2026-05-14 11:59:53 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2111000;state=BUSY_MOVING;x=200;z=171
+2026-05-14 11:59:54 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2112000;state=BUSY_MOVING;x=200;z=146
+2026-05-14 11:59:55 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2113000;state=BUSY_MOVING;x=200;z=121
+2026-05-14 11:59:56 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2114000;state=BUSY_MOVING;x=200;z=96
+2026-05-14 11:59:57 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2115000;state=BUSY_MOVING;x=200;z=71
+2026-05-14 11:59:58 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2116000;state=BUSY_MOVING;x=200;z=57
+2026-05-14 11:59:59 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2117000;state=BUSY_MOVING;x=200;z=51
+2026-05-14 12:00:00 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;29;OK;MOVE_DONE;x=200;z=50
+2026-05-14 12:00:00 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;READY;ref=1;x=200;z=50
+2026-05-14 12:00:00 [INFO   ] plattenwechsler.core.hauptablauf: SET_CLAMP CLOSED (Platte greifen)
+2026-05-14 12:00:00 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;30;SET_CLAMP;position=CLOSED
+2026-05-14 12:00:00 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;30;ACK
+2026-05-14 12:00:00 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;30;OK;CLAMP_CLOSED;x=200;z=50
+2026-05-14 12:00:00 [INFO   ] plattenwechsler.core.hauptablauf: MOVE_TO Drucker 2 Tür-Höhe (raus) (x=200 z=220)
+2026-05-14 12:00:00 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;31;MOVE_TO;x=200;z=220
+2026-05-14 12:00:00 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;31;ACK
+2026-05-14 12:00:00 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;BUSY_MOVING;ref=1;x=200;z=50
+2026-05-14 12:00:00 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2118000;state=BUSY_MOVING;x=200;z=50
+2026-05-14 12:00:01 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2119000;state=BUSY_MOVING;x=200;z=52
+2026-05-14 12:00:02 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2120000;state=BUSY_MOVING;x=200;z=60
+2026-05-14 12:00:03 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2121000;state=BUSY_MOVING;x=200;z=78
+2026-05-14 12:00:04 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2122000;state=BUSY_MOVING;x=200;z=103
+2026-05-14 12:00:05 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2123000;state=BUSY_MOVING;x=200;z=128
+2026-05-14 12:00:06 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2124000;state=BUSY_MOVING;x=200;z=153
+2026-05-14 12:00:07 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2125000;state=BUSY_MOVING;x=200;z=178
+2026-05-14 12:00:08 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2126000;state=BUSY_MOVING;x=200;z=202
+2026-05-14 12:00:09 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2127000;state=BUSY_MOVING;x=200;z=214
+2026-05-14 12:00:10 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2128000;state=BUSY_MOVING;x=200;z=218
+2026-05-14 12:00:10 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;31;OK;MOVE_DONE;x=200;z=220
+2026-05-14 12:00:10 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;READY;ref=1;x=200;z=220
+2026-05-14 12:00:10 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;32;SET_DOOR_ARM;position=CLOSED
+2026-05-14 12:00:10 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;32;ACK
+2026-05-14 12:00:10 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;32;OK;DOOR_ARM_CLOSED;x=200;z=220
+2026-05-14 12:00:10 [INFO   ] plattenwechsler.core.hauptablauf: MOVE_TO Ablage (x=20 z=20)
+2026-05-14 12:00:10 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;33;MOVE_TO;x=20;z=20
+2026-05-14 12:00:11 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;33;ACK
+2026-05-14 12:00:11 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;BUSY_MOVING;ref=1;x=200;z=220
+2026-05-14 12:00:11 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2129000;state=BUSY_MOVING;x=199;z=219
+2026-05-14 12:00:12 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2130000;state=BUSY_MOVING;x=195;z=215
+2026-05-14 12:00:13 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2131000;state=BUSY_MOVING;x=186;z=206
+2026-05-14 12:00:14 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2132000;state=BUSY_MOVING;x=164;z=184
+2026-05-14 12:00:15 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2133000;state=BUSY_MOVING;x=139;z=159
+2026-05-14 12:00:16 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2134000;state=BUSY_MOVING;x=114;z=134
+2026-05-14 12:00:17 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2135000;state=BUSY_MOVING;x=89;z=109
+2026-05-14 12:00:18 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2136000;state=BUSY_MOVING;x=64;z=84
+2026-05-14 12:00:19 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2137000;state=BUSY_MOVING;x=40;z=59
+2026-05-14 12:00:20 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2138000;state=BUSY_MOVING;x=26;z=36
+2026-05-14 12:00:21 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2139000;state=BUSY_MOVING;x=21;z=25
+2026-05-14 12:00:22 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2140000;state=BUSY_MOVING;x=20;z=21
+2026-05-14 12:00:22 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;33;OK;MOVE_DONE;x=20;z=20
+2026-05-14 12:00:22 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;READY;ref=1;x=20;z=20
+2026-05-14 12:00:22 [INFO   ] plattenwechsler.core.hauptablauf: SET_CLAMP OPEN (Platte ablegen)
+2026-05-14 12:00:22 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;34;SET_CLAMP;position=OPEN
+2026-05-14 12:00:22 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;34;ACK
+2026-05-14 12:00:22 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;34;OK;CLAMP_OPEN;x=20;z=20
+2026-05-14 12:00:22 [INFO   ] plattenwechsler.core.hauptablauf: MOVE_TO Magazin (x=50 z=50)
+2026-05-14 12:00:22 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;35;MOVE_TO;x=50;z=50
+2026-05-14 12:00:23 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;35;ACK
+2026-05-14 12:00:23 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;BUSY_MOVING;ref=1;x=20;z=20
+2026-05-14 12:00:23 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2141000;state=BUSY_MOVING;x=20;z=20
+2026-05-14 12:00:24 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2142000;state=BUSY_MOVING;x=27;z=27
+2026-05-14 12:00:25 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2143000;state=BUSY_MOVING;x=45;z=45
+2026-05-14 12:00:26 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2144000;state=BUSY_MOVING;x=49;z=49
+2026-05-14 12:00:26 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;35;OK;MOVE_DONE;x=50;z=50
+2026-05-14 12:00:26 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;READY;ref=1;x=50;z=50
+2026-05-14 12:00:26 [INFO   ] plattenwechsler.core.hauptablauf: SET_CLAMP CLOSED (Platte aus Magazin)
+2026-05-14 12:00:26 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;36;SET_CLAMP;position=CLOSED
+2026-05-14 12:00:26 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;36;ACK
+2026-05-14 12:00:26 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;36;OK;CLAMP_CLOSED;x=50;z=50
+2026-05-14 12:00:26 [INFO   ] plattenwechsler.core.hauptablauf: MOVE_TO Drucker 2 Anfahrt (x=200 z=200)
+2026-05-14 12:00:26 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;37;MOVE_TO;x=200;z=200
+2026-05-14 12:00:26 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;37;ACK
+2026-05-14 12:00:26 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;BUSY_MOVING;ref=1;x=50;z=50
+2026-05-14 12:00:27 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2145000;state=BUSY_MOVING;x=51;z=51
+2026-05-14 12:00:28 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2146000;state=BUSY_MOVING;x=57;z=57
+2026-05-14 12:00:29 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2147000;state=BUSY_MOVING;x=71;z=71
+2026-05-14 12:00:30 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2148000;state=BUSY_MOVING;x=96;z=96
+2026-05-14 12:00:31 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2149000;state=BUSY_MOVING;x=121;z=121
+2026-05-14 12:00:32 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2150000;state=BUSY_MOVING;x=146;z=146
+2026-05-14 12:00:33 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2151000;state=BUSY_MOVING;x=171;z=171
+2026-05-14 12:00:34 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2152000;state=BUSY_MOVING;x=189;z=189
+2026-05-14 12:00:35 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2153000;state=BUSY_MOVING;x=197;z=197
+2026-05-14 12:00:36 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2154000;state=BUSY_MOVING;x=199;z=199
+2026-05-14 12:00:36 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;37;OK;MOVE_DONE;x=200;z=200
+2026-05-14 12:00:36 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;READY;ref=1;x=200;z=200
+2026-05-14 12:00:36 [INFO   ] plattenwechsler.core.hauptablauf: MOVE_TO Drucker 2 Tür-Höhe (x=200 z=220)
+2026-05-14 12:00:36 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;38;MOVE_TO;x=200;z=220
+2026-05-14 12:00:36 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;38;ACK
+2026-05-14 12:00:36 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;BUSY_MOVING;ref=1;x=200;z=200
+2026-05-14 12:00:37 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2155000;state=BUSY_MOVING;x=200;z=205
+2026-05-14 12:00:38 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2156000;state=BUSY_MOVING;x=200;z=218
+2026-05-14 12:00:38 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;38;OK;MOVE_DONE;x=200;z=220
+2026-05-14 12:00:38 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;READY;ref=1;x=200;z=220
+2026-05-14 12:00:38 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;39;SET_DOOR_ARM;position=OPEN
+2026-05-14 12:00:38 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;39;ACK
+2026-05-14 12:00:38 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;39;OK;DOOR_ARM_OPEN;x=200;z=220
+2026-05-14 12:00:39 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;40;STATUS
+2026-05-14 12:00:39 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;40;ACK
+2026-05-14 12:00:39 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATUS;state=READY;error=NONE;ref=1;x=200;z=220;target_x=200;target_z=220;busy=0;gripper_home=0;door_arm_home=0;obstacle_ok=1;door_open=1;door_dist_mm=37
+2026-05-14 12:00:39 [INFO   ] plattenwechsler.core.hauptablauf: MOVE_TO Drucker 2 Druckbett (x=200 z=50)
+2026-05-14 12:00:39 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;41;MOVE_TO;x=200;z=50
+2026-05-14 12:00:39 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2157000;state=READY;x=200;z=220
+2026-05-14 12:00:39 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;41;ACK
+2026-05-14 12:00:39 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;BUSY_MOVING;ref=1;x=200;z=220
+2026-05-14 12:00:40 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2158000;state=BUSY_MOVING;x=200;z=217
+2026-05-14 12:00:41 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2159000;state=BUSY_MOVING;x=200;z=210
+2026-05-14 12:00:42 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2160000;state=BUSY_MOVING;x=200;z=193
+2026-05-14 12:00:43 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2161000;state=BUSY_MOVING;x=200;z=168
+2026-05-14 12:00:44 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2162000;state=BUSY_MOVING;x=200;z=143
+2026-05-14 12:00:45 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2163000;state=BUSY_MOVING;x=200;z=118
+2026-05-14 12:00:46 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2164000;state=BUSY_MOVING;x=200;z=93
+2026-05-14 12:00:47 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2165000;state=BUSY_MOVING;x=200;z=69
+2026-05-14 12:00:48 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2166000;state=BUSY_MOVING;x=200;z=56
+2026-05-14 12:00:49 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2167000;state=BUSY_MOVING;x=200;z=51
+2026-05-14 12:00:50 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;41;OK;MOVE_DONE;x=200;z=50
+2026-05-14 12:00:50 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;READY;ref=1;x=200;z=50
+2026-05-14 12:00:50 [INFO   ] plattenwechsler.core.hauptablauf: SET_CLAMP OPEN (Platte einsetzen)
+2026-05-14 12:00:50 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;42;SET_CLAMP;position=OPEN
+2026-05-14 12:00:50 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;42;ACK
+2026-05-14 12:00:50 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;42;OK;CLAMP_OPEN;x=200;z=50
+2026-05-14 12:00:50 [INFO   ] plattenwechsler.core.hauptablauf: MOVE_TO Drucker 2 Tür-Höhe (raus) (x=200 z=220)
+2026-05-14 12:00:50 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;43;MOVE_TO;x=200;z=220
+2026-05-14 12:00:50 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;43;ACK
+2026-05-14 12:00:50 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;BUSY_MOVING;ref=1;x=200;z=50
+2026-05-14 12:00:50 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2168000;state=BUSY_MOVING;x=200;z=50
+2026-05-14 12:00:51 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2169000;state=BUSY_MOVING;x=200;z=53
+2026-05-14 12:00:52 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2170000;state=BUSY_MOVING;x=200;z=61
+2026-05-14 12:00:53 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2171000;state=BUSY_MOVING;x=200;z=81
+2026-05-14 12:00:54 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2172000;state=BUSY_MOVING;x=200;z=106
+2026-05-14 12:00:55 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2173000;state=BUSY_MOVING;x=200;z=131
+2026-05-14 12:00:56 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2174000;state=BUSY_MOVING;x=200;z=156
+2026-05-14 12:00:57 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2175000;state=BUSY_MOVING;x=200;z=181
+2026-05-14 12:00:58 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2176000;state=BUSY_MOVING;x=200;z=204
+2026-05-14 12:00:59 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2177000;state=BUSY_MOVING;x=200;z=215
+2026-05-14 12:01:00 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2178000;state=BUSY_MOVING;x=200;z=219
+2026-05-14 12:01:00 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;43;OK;MOVE_DONE;x=200;z=220
+2026-05-14 12:01:00 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;READY;ref=1;x=200;z=220
+2026-05-14 12:01:00 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;44;SET_DOOR_ARM;position=CLOSED
+2026-05-14 12:01:00 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;44;ACK
+2026-05-14 12:01:00 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;44;OK;DOOR_ARM_CLOSED;x=200;z=220
+2026-05-14 12:01:00 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;45;MOVE_HOME
+2026-05-14 12:01:00 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;45;ACK
+2026-05-14 12:01:00 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;BUSY_MOVE_HOME;ref=1;x=200;z=220
+2026-05-14 12:01:01 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2179000;state=BUSY_MOVE_HOME;x=198;z=220
+2026-05-14 12:01:02 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2180000;state=BUSY_MOVE_HOME;x=196;z=220
+2026-05-14 12:01:03 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2181000;state=BUSY_MOVE_HOME;x=193;z=220
+2026-05-14 12:01:04 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2182000;state=BUSY_MOVE_HOME;x=191;z=220
+2026-05-14 12:01:05 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2183000;state=BUSY_MOVE_HOME;x=188;z=220
+2026-05-14 12:01:06 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2184000;state=BUSY_MOVE_HOME;x=186;z=220
+2026-05-14 12:01:06 [INFO   ] plattenwechsler.io_.gpio_manager: Endschalter X ausgelöst
+2026-05-14 12:01:06 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;46;HOME_SWITCH_HIT;axis=X
+2026-05-14 12:01:06 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;46;ACK
+2026-05-14 12:01:07 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2185000;state=BUSY_MOVE_HOME;x=0;z=219
+2026-05-14 12:01:08 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2186000;state=BUSY_MOVE_HOME;x=0;z=216
+2026-05-14 12:01:09 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2187000;state=BUSY_MOVE_HOME;x=0;z=214
+2026-05-14 12:01:09 [INFO   ] plattenwechsler.io_.gpio_manager: Endschalter Z ausgelöst
+2026-05-14 12:01:09 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;47;HOME_SWITCH_HIT;axis=Z
+2026-05-14 12:01:09 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;47;ACK
+2026-05-14 12:01:09 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;45;OK;MOVE_HOME_DONE;x=0;z=0
+2026-05-14 12:01:09 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;READY;ref=1;x=0;z=0
+2026-05-14 12:01:09 [INFO   ] plattenwechsler.core.hauptablauf: Plattenwechsel Auftrag#2(Drucker=2, Quelle=Touchdisplay) erfolgreich
+2026-05-14 12:01:09 [INFO   ] plattenwechsler.core.hauptablauf: Systemzustand: PLATTENWECHSEL → BEREITSCHAFT
+2026-05-14 12:01:10 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2188000;state=READY;x=0;z=0
+2026-05-14 12:01:11 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2189000;state=READY;x=0;z=0
+2026-05-14 12:01:12 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2190000;state=READY;x=0;z=0
+2026-05-14 12:01:13 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2191000;state=READY;x=0;z=0
+2026-05-14 12:01:14 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=2192000;state=READY;x=0;z=0

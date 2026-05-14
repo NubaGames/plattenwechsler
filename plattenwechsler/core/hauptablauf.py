@@ -431,8 +431,11 @@ class Hauptablauf:
         self._fahre(d.pos_x, d.pos_z_tuer, f"Drucker {d.id} Tür-Höhe (raus)")
         self._tuer_schliessen()
 
-        # Phase 5: Heim
-        self._move_home()
+        # Phase 5: Heim — nur wenn keine weiteren Aufträge warten
+        if self.queue.is_empty():
+            self._move_home()
+        else:
+            logger.info("Weitere Aufträge in Queue — Heimfahrt übersprungen")
         logger.info("Plattenwechsel %s erfolgreich", a)
 
     def _tuer_oeffnen(self, d: DruckerConfig):
