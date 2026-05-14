@@ -352,6 +352,8 @@ class Hauptablauf:
 
         logger.info("Referenzfahrt")
         try:
+            try: self.esp.stream_on()
+            except Exception: logger.warning("STREAM_ON fehlgeschlagen")
             cmd_id = self.esp.home_start()
             # Schalter sofort melden falls Schlitten schon in Homeposition
             for axis in self.gpio.get_pressed_axes():

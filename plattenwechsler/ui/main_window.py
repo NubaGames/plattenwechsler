@@ -418,8 +418,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self._timer.start(250)
 
         self._aktive_seite = "status"
+        self._kacheln: dict = {}
         self._switch("status")
         self._rebuild_drucker_editoren()
+        self._rebuild_kacheln()
         self._refresh()
 
     def _wrap_scroll(self, content: QtWidgets.QWidget) -> QtWidgets.QScrollArea:
@@ -854,20 +856,13 @@ class MainWindow(QtWidgets.QMainWindow):
             h.addWidget(st, stretch=1)
             layout.addWidget(row)
 
-    def _refresh_manuell(self, snap):
-        # Layout leeren
+    def _rebuild_kacheln(self):
         while self.manuell_grid.count():
             item = self.manuell_grid.takeAt(0)
             if item.widget(): item.widget().deleteLater()
+        self._kacheln.clear()
 
-        ds = snap["drucker_status"]
-        try: sys_state = SystemState(snap["system_state"])
-        except ValueError: sys_state = SystemState.INIT
-        kann_klicken = (snap["fehler"] is None and snap["esp"]["connected"]
-                        and sys_state in (SystemState.BEREITSCHAFT,
-                                           SystemState.PLATTENWECHSEL))
-
-        druckers = snap["drucker_config"]
+        druckers = self.hauptablauf.config.drucker_liste()
         if not druckers:
             l = QtWidgets.QLabel(
                 "Noch kein Drucker konfiguriert.\n"
@@ -877,17 +872,27 @@ class MainWindow(QtWidgets.QMainWindow):
             self.manuell_grid.addWidget(l, 0, 0)
             return
 
-        for idx, dc_dict in enumerate(druckers):
-            dc = DruckerConfig.from_dict(dc_dict)
+        for idx, dc in enumerate(druckers):
             kachel = DruckerKachel(dc)
-            try: ds_enum = DruckerStatus(ds.get(dc.id, "bereit"))
+            kachel.clicked.connect(self._on_kachel_clicked)
+            self.manuell_grid.addWidget(kachel, idx // 2, idx % 2)
+            self._kacheln[dc.id] = kachel
+        self.manuell_grid.setColumnStretch(0, 1)
+        self.manuell_grid.setColumnStretch(1, 1)
+
+    def _refresh_manuell(self, snap):
+        ds = snap["drucker_status"]
+        try: sys_state = SystemState(snap["system_state"])
+        except ValueError: sys_state = SystemState.INIT
+        kann_klicken = (snap["fehler"] is None and snap["esp"]["connected"]
+                        and sys_state in (SystemState.BEREITSCHAFT,
+                                           SystemState.PLATTENWECHSEL))
+
+        for did, kachel in self._kacheln.items():
+            try: ds_enum = DruckerStatus(ds.get(did, "bereit"))
             except ValueError: ds_enum = DruckerStatus.BEREIT
             kachel.setStatus(ds_enum)
             kachel.setClickEnabled(kann_klicken and ds_enum == DruckerStatus.BEREIT)
-            kachel.clicked.connect(self._on_kachel_clicked)
-            self.manuell_grid.addWidget(kachel, idx // 2, idx % 2)
-        self.manuell_grid.setColumnStretch(0, 1)
-        self.manuell_grid.setColumnStretch(1, 1)
 
     def _refresh_service(self, snap, sys_state, connected):
         service_active = sys_state == SystemState.SERVICE and connected
@@ -991,6 +996,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def _on_config_changed(self):
         self._rebuild_drucker_editoren()
+        self._rebuild_kacheln()
         self._refresh()
 
     def _on_drucker_saved(self, dc: DruckerConfig):
