@@ -352,7 +352,14 @@ class Hauptablauf:
 
         logger.info("Referenzfahrt")
         try:
-            self.esp.home(timeout_s=self._home_timeout_s)
+            cmd_id = self.esp.home_start()
+            # Schalter sofort melden falls Schlitten schon in Homeposition
+            for axis in self.gpio.get_pressed_axes():
+                logger.info("Endschalter %s bereits aktiv — HOME_SWITCH_HIT", axis)
+                try: self.esp.home_switch_hit(axis)
+                except Exception as e:
+                    logger.warning("HOME_SWITCH_HIT %s: %s", axis, e)
+            self.esp.home_wait(cmd_id, timeout_s=self._home_timeout_s)
         except EspBefehlAbgelehnt as e:
             raise PlattenwechslerError(ErrorClass.FAHRFEHLER,
                 f"Referenzfahrt abgelehnt: {e.esp_code}", esp_code=e.esp_code)

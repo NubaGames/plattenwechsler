@@ -107,9 +107,15 @@ class BaseEspClient:
     def stop_motors(self):
         self.send_and_wait("STOP")
 
-    def home(self, timeout_s: float = 30.0):
+    def home_start(self) -> int:
         msg = self.send_and_wait("HOME")
-        self.wait_for_event(msg.msg_id, "HOME_DONE", timeout_s=timeout_s)
+        return msg.msg_id
+
+    def home_wait(self, cmd_id: int, timeout_s: float = 30.0):
+        self.wait_for_event(cmd_id, "HOME_DONE", timeout_s=timeout_s)
+
+    def home(self, timeout_s: float = 30.0):
+        self.home_wait(self.home_start(), timeout_s)
 
     def move_home(self, timeout_s: float = 30.0):
         msg = self.send_and_wait("MOVE_HOME")

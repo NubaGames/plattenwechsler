@@ -4464,3 +4464,66 @@
 2026-05-14 11:51:02 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=1580000;state=READY;x=0;z=0
 2026-05-14 11:51:03 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=1581000;state=READY;x=0;z=0
 2026-05-14 11:51:04 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=1582000;state=READY;x=0;z=0
+2026-05-14 11:54:23 [INFO   ] main: === Plattenwechsler startet ===
+2026-05-14 11:54:24 [INFO   ] plattenwechsler.io_.gpio_manager: GPIO bereit (4 Drucker-Taster)
+2026-05-14 11:54:24 [INFO   ] plattenwechsler.io_.gpio_manager: Not-Aus an Pin 26 aktiv
+2026-05-14 11:54:24 [INFO   ] plattenwechsler.io_.esp_client: ESP verbunden: /dev/ttyUSB0 @ 115200
+2026-05-14 11:54:24 [INFO   ] plattenwechsler.io_.mqtt_client: MQTT verbinde mit localhost:1883
+2026-05-14 11:54:24 [INFO   ] plattenwechsler.io_.mqtt_client: MQTT verbunden
+2026-05-14 11:54:25 [INFO   ] plattenwechsler.io_.telegram_client: Telegram-Bot @plattenwechsler_bot verbunden
+2026-05-14 11:54:25 [INFO   ] plattenwechsler.core.hauptablauf: Hauptablauf gestartet
+2026-05-14 11:54:25 [INFO   ] plattenwechsler.core.hauptablauf: Init: warte auf ESP …
+2026-05-14 11:54:25 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=1783000;state=READY;x=0;z=0
+2026-05-14 11:54:26 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;1;PING
+2026-05-14 11:54:26 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;1;ACK
+2026-05-14 11:54:26 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;1;OK;PONG;x=0;z=0
+2026-05-14 11:54:26 [INFO   ] plattenwechsler.core.hauptablauf: Systemzustand: INIT → REFERENZFAHRT
+2026-05-14 11:54:26 [INFO   ] plattenwechsler.core.hauptablauf: Referenzfahrt
+2026-05-14 11:54:26 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;2;HOME
+2026-05-14 11:54:26 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;2;ACK
+2026-05-14 11:54:26 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;BUSY_HOMING;ref=0;x=0;z=0
+2026-05-14 11:54:26 [INFO   ] plattenwechsler.core.hauptablauf: Endschalter X bereits aktiv — HOME_SWITCH_HIT
+2026-05-14 11:54:26 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;3;HOME_SWITCH_HIT;axis=X
+2026-05-14 11:54:26 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;3;ACK
+2026-05-14 11:54:26 [INFO   ] plattenwechsler.core.hauptablauf: Endschalter Z bereits aktiv — HOME_SWITCH_HIT
+2026-05-14 11:54:26 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;4;HOME_SWITCH_HIT;axis=Z
+2026-05-14 11:54:26 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;4;ACK
+2026-05-14 11:54:26 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;2;OK;HOME_DONE;x=0;z=0
+2026-05-14 11:54:26 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;READY;ref=1;x=0;z=0
+2026-05-14 11:54:26 [INFO   ] plattenwechsler.core.hauptablauf: Systemzustand: REFERENZFAHRT → BEREITSCHAFT
+2026-05-14 11:54:26 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=1784000;state=READY;x=0;z=0
+2026-05-14 11:54:27 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=1785000;state=READY;x=0;z=0
+2026-05-14 11:54:28 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=1786000;state=READY;x=0;z=0
+2026-05-14 11:54:29 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=1787000;state=READY;x=0;z=0
+2026-05-14 11:54:57 [INFO   ] main: === Plattenwechsler startet ===
+2026-05-14 11:54:57 [INFO   ] plattenwechsler.io_.gpio_manager: GPIO bereit (4 Drucker-Taster)
+2026-05-14 11:54:57 [INFO   ] plattenwechsler.io_.gpio_manager: Not-Aus an Pin 26 aktiv
+2026-05-14 11:54:58 [INFO   ] plattenwechsler.io_.esp_client: ESP verbunden: /dev/ttyUSB0 @ 115200
+2026-05-14 11:54:58 [INFO   ] plattenwechsler.io_.mqtt_client: MQTT verbinde mit localhost:1883
+2026-05-14 11:54:58 [INFO   ] plattenwechsler.io_.mqtt_client: MQTT verbunden
+2026-05-14 11:54:58 [INFO   ] plattenwechsler.io_.telegram_client: Telegram-Bot @plattenwechsler_bot verbunden
+2026-05-14 11:54:58 [INFO   ] plattenwechsler.core.hauptablauf: Hauptablauf gestartet
+2026-05-14 11:54:58 [INFO   ] plattenwechsler.core.hauptablauf: Init: warte auf ESP …
+2026-05-14 11:54:59 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=1817000;state=READY;x=0;z=0
+2026-05-14 11:54:59 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;1;PING
+2026-05-14 11:54:59 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;1;ACK
+2026-05-14 11:54:59 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;1;OK;PONG;x=0;z=0
+2026-05-14 11:54:59 [INFO   ] plattenwechsler.core.hauptablauf: Systemzustand: INIT → REFERENZFAHRT
+2026-05-14 11:54:59 [INFO   ] plattenwechsler.core.hauptablauf: Referenzfahrt
+2026-05-14 11:54:59 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;2;HOME
+2026-05-14 11:54:59 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;2;ACK
+2026-05-14 11:54:59 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;BUSY_HOMING;ref=0;x=0;z=0
+2026-05-14 11:55:00 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=1818000;state=BUSY_HOMING;x=-1;z=0
+2026-05-14 11:55:00 [INFO   ] plattenwechsler.io_.gpio_manager: Endschalter Z ausgelöst
+2026-05-14 11:55:00 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;3;HOME_SWITCH_HIT;axis=Z
+2026-05-14 11:55:00 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;3;ACK
+2026-05-14 11:55:01 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=1819000;state=BUSY_HOMING;x=-4;z=0
+2026-05-14 11:55:01 [INFO   ] plattenwechsler.io_.gpio_manager: Endschalter X ausgelöst
+2026-05-14 11:55:01 [DEBUG  ] plattenwechsler.io_.esp_client: → CMD;4;HOME_SWITCH_HIT;axis=X
+2026-05-14 11:55:01 [DEBUG  ] plattenwechsler.io_.esp_client: ← RSP;4;ACK
+2026-05-14 11:55:01 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;2;OK;HOME_DONE;x=0;z=0
+2026-05-14 11:55:01 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;STATE;READY;ref=1;x=0;z=0
+2026-05-14 11:55:01 [INFO   ] plattenwechsler.core.hauptablauf: Systemzustand: REFERENZFAHRT → BEREITSCHAFT
+2026-05-14 11:55:02 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=1820000;state=READY;x=0;z=0
+2026-05-14 11:55:03 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=1821000;state=READY;x=0;z=0
+2026-05-14 11:55:04 [DEBUG  ] plattenwechsler.io_.esp_client: ← EVT;0;HEARTBEAT;uptime_ms=1822000;state=READY;x=0;z=0

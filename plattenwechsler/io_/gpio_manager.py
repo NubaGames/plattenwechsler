@@ -125,6 +125,13 @@ class GpioManager:
             try: self.on_not_aus()
             except Exception: logger.exception("on_not_aus")
 
+    def get_pressed_axes(self) -> list:
+        """Gibt aktuell gedrückte Endschalter-Achsen zurück."""
+        if self._mock_mode:
+            return [a for a in ("X", "Z") if self._mock_states.get(f"es_{a}")]
+        return [a for a in ("X", "Z")
+                if (d := self._devices.get(f"es_{a}")) and d.is_pressed]
+
     # ---- Mock-Trigger ----
     def mock_drucker_fertig(self, did: int):
         if not self._mock_mode: return
