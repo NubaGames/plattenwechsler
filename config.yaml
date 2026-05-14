@@ -1,0 +1,88 @@
+system:
+  log_level: DEBUG
+  log_file: /home/nura/plattenwechsler/plattenwechsler.log
+
+esp:
+  port: /dev/ttyUSB0
+  baud: 115200
+  read_timeout_s: 0.1
+  ack_timeout_s: 1.0
+  move_timeout_s: 60.0
+  home_timeout_s: 30.0
+  mech_timeout_s: 10.0
+  heartbeat_timeout_s: 5.0
+  reconnect_intervall_s: 2.0
+  # Auf true setzen solange Endschalter noch nicht verdrahtet sind.
+  # Der Pi sendet dann kein HOME und setzt den ESP direkt auf READY.
+  skip_homing: false
+
+gpio:
+  endschalter:
+    x: 24
+    z: 25
+  not_aus:
+    pin: 26
+    invert: false
+
+# Drucker-Liste — wird über UI/Web bearbeitet, automatisch hier gespeichert
+drucker:
+  - id: 1
+    name: Drucker 1
+    pin_fertig: 17
+    pos_x: 100
+    pos_z_anfahr: 200
+    pos_z_tuer: 250
+    pos_z_druckbett: 50
+    door_arm_hub_mm: 50
+  - id: 2
+    name: Drucker 2
+    pin_fertig: 27
+    pos_x: 400
+    pos_z_anfahr: 200
+    pos_z_tuer: 250
+    pos_z_druckbett: 50
+    door_arm_hub_mm: 50
+  - id: 3
+    name: Drucker 3
+    pin_fertig: 22
+    pos_x: 700
+    pos_z_anfahr: 200
+    pos_z_tuer: 250
+    pos_z_druckbett: 50
+    door_arm_hub_mm: 50
+  - id: 4
+    name: Drucker 4
+    pin_fertig: 23
+    pos_x: 1000
+    pos_z_anfahr: 200
+    pos_z_tuer: 250
+    pos_z_druckbett: 50
+    door_arm_hub_mm: 50
+
+positionen:
+  ablage:  { x: 1200, z: 100 }
+  magazin: { x: 1300, z: 150 }
+
+mqtt:
+  enabled: true
+  broker_host: "localhost"
+  broker_port: 1883
+  username: ""
+  password: ""
+  client_id: "plattenwechsler-pi"
+  base_topic: "plattenwechsler"
+  qos: 1
+  retain_status: true
+  reconnect_intervall_s: 5.0
+
+telegram:
+  enabled: true
+  bot_token: "8738312124:AAEtGA1zwQ4AZEYSBdRRei5qt2nO69m-akA"
+  allowed_chat_ids:
+    - 8784408821
+  send_status_to_first: true
+
+hmi:
+  fullscreen: true
+  width: 1280
+  height: 720

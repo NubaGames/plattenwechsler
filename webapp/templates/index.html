@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#C8102E">
+<title>Plattenwechsler</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">P</div>
+    <div class="brand-text">
+      <div class="brand-title">Plattenwechsler</div>
+      <div class="brand-sub">G6-TWIE23A · DHBW Stuttgart</div>
+    </div>
+  </div>
+  <div class="conn">
+    <span class="dot" id="dotMqtt"></span>
+    <span class="conn-label" id="connLabel">verbinde …</span>
+  </div>
+</header>
+
+<nav class="tabbar">
+  <button class="tab active" data-tab="status">Status</button>
+  <button class="tab" data-tab="manuell">Manuell</button>
+  <button class="tab" data-tab="service">Service</button>
+  <button class="tab" data-tab="drucker">Drucker</button>
+  <button class="tab" data-tab="fehler">
+    Fehler <span class="badge" id="fehlerBadge" style="display:none">!</span>
+  </button>
+</nav>
+
+<!-- STATUS -->
+<section class="page active" id="page-status">
+  <div class="banner" id="statusBanner">
+    <div class="banner-text" id="statusText">VERBINDE …</div>
+    <div class="banner-sub" id="statusSub"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Schlitten-Position</div>
+    <div class="pos-row">
+      <div class="pos-cell">
+        <div class="pos-label">X</div>
+        <div class="pos-value" id="posX">— mm</div>
+      </div>
+      <div class="pos-cell">
+        <div class="pos-label">Z</div>
+        <div class="pos-value" id="posZ">— mm</div>
+      </div>
+    </div>
+    <div class="kv-row">
+      <div class="kv"><span class="kv-key">Referenziert</span><span class="kv-value" id="kvRef">—</span></div>
+      <div class="kv"><span class="kv-key">Platte am Schlitten</span><span class="kv-value" id="kvPlate">—</span></div>
+      <div class="kv"><span class="kv-key">Hindernissensor</span><span class="kv-value" id="kvObst">—</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Drucker</div>
+    <div class="printer-list" id="printerList"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Auftragswarteschlange</div>
+    <ul class="queue-list" id="queueList"><li class="empty">— keine Aufträge —</li></ul>
+  </div>
+</section>
+
+<!-- MANUELL -->
+<section class="page" id="page-manuell">
+  <h2 class="page-title">Manueller Plattenwechsel</h2>
+  <p class="page-sub">Drucker antippen um einen Plattenwechsel zu starten.</p>
+  <div class="printer-grid" id="printerGrid"></div>
+</section>
+
+<!-- SERVICE -->
+<section class="page" id="page-service">
+  <h2 class="page-title">Service-Funktionen</h2>
+  <div class="service-banner" id="serviceBanner">
+    Service-Modus inaktiv. Aktiviere ihn um den Schlitten manuell zu bewegen.
+  </div>
+  <div class="service-toggle">
+    <button class="btn btn-toggle" id="btnServiceModus">Service-Modus aktivieren</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Schlitten zu Drucker fahren</div>
+    <div class="pos-buttons" id="serviceDruckerButtons"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Weitere Positionen</div>
+    <div class="pos-buttons">
+      <button class="btn pos-btn" data-ziel="home" disabled>Home</button>
+      <button class="btn pos-btn" data-ziel="ablage" disabled>Ablage</button>
+      <button class="btn pos-btn" data-ziel="magazin" disabled>Magazin</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Referenzfahrt</div>
+    <button class="btn btn-primary" id="btnReferenzfahrt">Referenzfahrt durchführen</button>
+  </div>
+</section>
+
+<!-- DRUCKER -->
+<section class="page" id="page-drucker">
+  <h2 class="page-title">Drucker-Konfiguration</h2>
+  <p class="page-sub">
+    Positionen, Pins und Werte pro Drucker.
+    Änderungen werden direkt in die config.yaml auf dem Pi gespeichert.
+  </p>
+  <button class="btn btn-primary" id="btnDruckerHinzufuegen">➕ Neuen Drucker hinzufügen</button>
+  <div id="druckerList"></div>
+</section>
+
+<!-- FEHLER -->
+<section class="page" id="page-fehler">
+  <h2 class="page-title">Fehler & Quittierung</h2>
+  <div class="error-card" id="errorCard">
+    <div class="error-class" id="errorClass">Kein aktiver Fehler</div>
+    <div class="error-msg" id="errorMsg">Das System läuft normal.</div>
+    <div class="error-meta" id="errorMeta"></div>
+    <button class="btn btn-success" id="btnQuittieren" disabled>Fehler quittieren</button>
+  </div>
+  <div class="card">
+    <div class="card-title">Letzte Ereignisse</div>
+    <ul class="event-list" id="eventList"><li class="empty">— keine Ereignisse —</li></ul>
+  </div>
+</section>
+
+<footer class="stop-footer">
+  <button class="btn btn-stop" id="btnStop">⏹ STOP</button>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<!-- Drucker-Editor Modal -->
+<div class="modal-backdrop" id="druckerModal">
+  <div class="modal">
+    <div class="modal-title" id="druckerModalTitle">Drucker bearbeiten</div>
+    <div class="form-grid">
+      <label>Name<input type="text" id="f_name"></label>
+      <label>Pin Fertig-Taster (BCM)<input type="number" id="f_pin" min="0" max="40"></label>
+      <label>X-Position (mm)<input type="number" id="f_pos_x" min="0" max="5000"></label>
+      <label>Z Anfahrt – sicher (mm)<input type="number" id="f_anfahr" min="0" max="2000"></label>
+      <label>Z Türarm-Höhe (mm)<input type="number" id="f_tuer" min="0" max="2000"></label>
+      <label>Z Druckbett (mm)<input type="number" id="f_bett" min="0" max="2000"></label>
+      <label>Türarm-Hub (mm)<input type="number" id="f_hub" min="0" max="500"></label>
+    </div>
+    <div class="modal-buttons">
+      <button class="btn" id="btnDruckerCancel">Abbrechen</button>
+      <button class="btn btn-primary" id="btnDruckerSpeichern">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
