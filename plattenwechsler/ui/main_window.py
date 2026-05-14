@@ -11,6 +11,7 @@ Alle ESP/Hauptablauf-Callbacks landen über Qt-Signals threadsicher in der UI.
 from __future__ import annotations
 
 import logging
+import threading
 import time
 from typing import Optional
 
@@ -491,9 +492,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self._aktive_seite = "status"
         self._kacheln: dict = {}
         self._drucker_kacheln: dict = {}
+        self._service_drucker_btns: list = []
+        self._service_busy = False
         self._switch("status")
         self._rebuild_drucker_kacheln()
         self._rebuild_kacheln()
+        self._rebuild_service_drucker_btns()
         self._refresh()
 
     def _wrap_scroll(self, content: QtWidgets.QWidget) -> QtWidgets.QScrollArea:
@@ -986,7 +990,7 @@ class MainWindow(QtWidgets.QMainWindow):
             kachel.setClickEnabled(kann_klicken and ds_enum == DruckerStatus.BEREIT)
 
     def _refresh_service(self, snap, sys_state, connected):
-        service_active = sys_state == SystemState.SERVICE and connected
+        service_active = sys_state == SystemState.SERVICE and connected and not self._service_busy
 
         if sys_state == SystemState.SERVICE:
             self.service_banner.setText(
@@ -1015,31 +1019,9 @@ class MainWindow(QtWidgets.QMainWindow):
             btn = getattr(self, f"btn_pos_{key}")
             btn.setEnabled(service_active)
 
-        # Drucker-Buttons
-        lay = self.fahre_drucker_w.layout()
-        while lay.count():
-            item = lay.takeAt(0)
-            if item.widget(): item.widget().deleteLater()
-        druckers = self.hauptablauf.config.drucker_liste()
-        if not druckers:
-            l = QtWidgets.QLabel("— kein Drucker konfiguriert —")
-            l.setStyleSheet(f"color: {COL_TEXT_MUTED};")
-            l.setAlignment(QtCore.Qt.AlignCenter)
-            lay.addWidget(l)
-        else:
-            grid_w = QtWidgets.QWidget()
-            grid = QtWidgets.QGridLayout(grid_w)
-            grid.setContentsMargins(0, 0, 0, 0); grid.setSpacing(8)
-            for i, d in enumerate(druckers):
-                btn = QtWidgets.QPushButton(d.name or f"Drucker {d.id}")
-                btn.setMinimumHeight(40)
-                btn.setEnabled(service_active)
-                btn.clicked.connect(
-                    lambda _, did=d.id: self._on_service_drucker(did))
-                grid.addWidget(btn, i // 4, i % 4)
-            for col in range(4):
-                grid.setColumnStretch(col, 1)
-            lay.addWidget(grid_w)
+        # Drucker-Buttons — nur enabled-Zustand aktualisieren
+        for btn in self._service_drucker_btns:
+            btn.setEnabled(service_active)
 
     def _refresh_fehler(self, snap):
         f = snap["fehler"]
@@ -1075,6 +1057,37 @@ class MainWindow(QtWidgets.QMainWindow):
     def _d_color(self, s: str) -> str:
         return {"bereit": COL_TEXT_MUTED, "druckt": COL_TEXT_DIM,
                 "in_queue": COL_WARN, "aktiv": COL_DHBW_RED}.get(s, COL_TEXT_MUTED)
+
+    # ============================================================
+    # Service-Drucker-Buttons (einmalig aufbauen)
+    # ============================================================
+    def _rebuild_service_drucker_btns(self):
+        lay = self.fahre_drucker_w.layout()
+        while lay.count():
+            item = lay.takeAt(0)
+            if item.widget(): item.widget().deleteLater()
+        self._service_drucker_btns.clear()
+
+        druckers = self.hauptablauf.config.drucker_liste()
+        if not druckers:
+            l = QtWidgets.QLabel("— kein Drucker konfiguriert —")
+            l.setStyleSheet(f"color: {COL_TEXT_MUTED};")
+            l.setAlignment(QtCore.Qt.AlignCenter)
+            lay.addWidget(l)
+            return
+
+        grid_w = QtWidgets.QWidget()
+        grid = QtWidgets.QGridLayout(grid_w)
+        grid.setContentsMargins(0, 0, 0, 0); grid.setSpacing(8)
+        for i, d in enumerate(druckers):
+            btn = QtWidgets.QPushButton(d.name or f"Drucker {d.id}")
+            btn.setMinimumHeight(40)
+            btn.clicked.connect(lambda _, did=d.id: self._on_service_drucker(did))
+            grid.addWidget(btn, i // 4, i % 4)
+            self._service_drucker_btns.append(btn)
+        for col in range(4):
+            grid.setColumnStretch(col, 1)
+        lay.addWidget(grid_w)
 
     # ============================================================
     # Drucker-Kacheln (Drucker-Tab)
@@ -1150,6 +1163,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def _on_config_changed(self):
         self._rebuild_drucker_kacheln()
         self._rebuild_kacheln()
+        self._rebuild_service_drucker_btns()
         self._refresh()
 
     def _on_drucker_add(self):
@@ -1182,12 +1196,24 @@ class MainWindow(QtWidgets.QMainWindow):
         self.hauptablauf.fehler.quittieren()
 
     def _on_service_drucker(self, did: int):
-        ok = self.hauptablauf.service_fahre_zu_drucker(did)
-        self._toast("Schlitten", f"→ Drucker {did}" if ok else "Fehler")
+        self._run_service_cmd(
+            lambda: self.hauptablauf.service_fahre_zu_drucker(did),
+            f"→ Drucker {did}")
 
     def _on_service_pos(self, ziel: str, label: str):
-        ok = self.hauptablauf.service_fahre_zu_position(ziel)
-        self._toast("Schlitten", f"→ {label}" if ok else "Fehler")
+        self._run_service_cmd(
+            lambda: self.hauptablauf.service_fahre_zu_position(ziel),
+            f"→ {label}")
+
+    def _run_service_cmd(self, fn, ok_label: str):
+        if self._service_busy:
+            return
+        self._service_busy = True
+        def run():
+            ok = fn()
+            self.signals.toast.emit("Schlitten", ok_label if ok else "Fehler")
+            self._service_busy = False
+        threading.Thread(target=run, daemon=True).start()
 
     # ============================================================
     # Slots
