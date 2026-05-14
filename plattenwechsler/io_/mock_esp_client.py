@@ -160,7 +160,7 @@ class MockEspClient(BaseEspClient):
             return ack
 
         if befehl == "RESET_ERROR":
-            if self.status.state not in (EspState.ERROR, EspState.STOPPED):
+            if self.status.state != EspState.ERROR:
                 raise EspBefehlAbgelehnt("INVALID_STATE")
             with self._lock:
                 self.status.error = "NONE"

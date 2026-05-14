@@ -36,6 +36,12 @@ class AuftragsQueue:
         with self._lock:
             return list(self._q)
 
+    def leeren(self) -> int:
+        with self._lock:
+            n = len(self._q)
+            self._q.clear()
+            return n
+
     def enthaelt_drucker(self, drucker_id: int) -> bool:
         with self._lock:
             return any(a.drucker_id == drucker_id for a in self._q)

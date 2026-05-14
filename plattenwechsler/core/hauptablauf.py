@@ -231,6 +231,19 @@ class Hauptablauf:
             try: self.on_auftrag_abgelehnt(Auftrag(drucker_id=did, quelle=quelle), grund)
             except Exception: logger.exception("on_auftrag_abgelehnt")
 
+    def manueller_stop(self):
+        try: self.esp.stop_motors()
+        except Exception: pass
+        n = self.queue.leeren()
+        for did in list(self._drucker_status.keys()):
+            self._set_drucker_status(did, DruckerStatus.BEREIT)
+        if n:
+            logger.info("Warteschlange geleert (%d Aufträge verworfen)", n)
+        self.fehler.melde(
+            ErrorClass.INTERNER_FEHLER,
+            "Manueller Stopp — bitte Schlitten und Anlage prüfen "
+            "(Platte auf Schlitten?)")
+
     def manuelle_referenzfahrt(self):
         if self.fehler.hat_fehler: return
         if self.state == SystemState.PLATTENWECHSEL: return
@@ -496,7 +509,7 @@ class Hauptablauf:
             self._not_aus_aktiv = False
         try:
             if self.esp.is_connected():
-                if self.esp.status.state in (EspState.ERROR, EspState.STOPPED):
+                if self.esp.status.state == EspState.ERROR:
                     self.esp.reset_error()
                 self.fehler.fehler_loeschen()
                 self._set_state(SystemState.REFERENZFAHRT); return

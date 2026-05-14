@@ -1026,11 +1026,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self._switch("status")
 
     def _on_stop(self):
-        try:
-            self.hauptablauf.esp.stop_motors()
-            self._toast("STOP", "Bewegung angehalten")
-        except Exception as e:
-            QtWidgets.QMessageBox.critical(self, "Fehler", str(e))
+        self.hauptablauf.manueller_stop()
 
     def _on_quittieren(self):
         self.hauptablauf.fehler.quittieren()

@@ -31,37 +31,37 @@ drucker:
     pin_fertig: 17
     pos_x: 100
     pos_z_anfahr: 200
-    pos_z_tuer: 250
+    pos_z_tuer: 220
     pos_z_druckbett: 50
     door_arm_hub_mm: 50
   - id: 2
     name: Drucker 2
     pin_fertig: 27
-    pos_x: 400
+    pos_x: 200
     pos_z_anfahr: 200
-    pos_z_tuer: 250
+    pos_z_tuer: 220
     pos_z_druckbett: 50
     door_arm_hub_mm: 50
   - id: 3
     name: Drucker 3
     pin_fertig: 22
-    pos_x: 700
-    pos_z_anfahr: 200
-    pos_z_tuer: 250
+    pos_x: 200
+    pos_z_anfahr: 100
+    pos_z_tuer: 120
     pos_z_druckbett: 50
     door_arm_hub_mm: 50
   - id: 4
     name: Drucker 4
     pin_fertig: 23
-    pos_x: 1000
-    pos_z_anfahr: 200
-    pos_z_tuer: 250
+    pos_x: 100
+    pos_z_anfahr: 100
+    pos_z_tuer: 120
     pos_z_druckbett: 50
     door_arm_hub_mm: 50
 
 positionen:
-  ablage:  { x: 1200, z: 100 }
-  magazin: { x: 1300, z: 150 }
+  ablage:  { x: 20, z: 20 }
+  magazin: { x: 50, z: 50 }
 
 mqtt:
   enabled: true
