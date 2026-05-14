@@ -397,6 +397,8 @@ class Hauptablauf:
                 except Exception: logger.exception("on_auftrag_erfolgreich")
             self._set_drucker_status(a.drucker_id, DruckerStatus.BEREIT)
         finally:
+            if self._aktiver_drucker is not None:
+                self._set_drucker_status(self._aktiver_drucker, DruckerStatus.BEREIT)
             self._aktiver_drucker = None
             if not self.fehler.hat_fehler:
                 self._set_state(SystemState.BEREITSCHAFT)
