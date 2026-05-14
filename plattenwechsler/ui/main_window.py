@@ -180,30 +180,30 @@ class DruckerKachel(QtWidgets.QFrame):
         self.drucker_id = dc.id
         self._status = DruckerStatus.BEREIT
         self._enabled = True
-        self.setMinimumHeight(150)
+        self.setMinimumHeight(110)
 
         v = QtWidgets.QVBoxLayout(self)
-        v.setContentsMargins(18, 16, 18, 16); v.setSpacing(8)
+        v.setContentsMargins(12, 10, 12, 10); v.setSpacing(5)
 
         top = QtWidgets.QHBoxLayout()
         self.lbl_name = QtWidgets.QLabel(dc.name or f"Drucker {dc.id}")
-        self.lbl_name.setStyleSheet(f"color: {COL_TEXT}; font-size: 19px; font-weight: 600;")
+        self.lbl_name.setStyleSheet(f"color: {COL_TEXT}; font-size: 14px; font-weight: 600;")
         top.addWidget(self.lbl_name)
         top.addStretch()
         self.lbl_badge = QtWidgets.QLabel("BEREIT")
         self.lbl_badge.setAlignment(QtCore.Qt.AlignCenter)
-        self.lbl_badge.setMinimumWidth(70)
+        self.lbl_badge.setMinimumWidth(58)
         top.addWidget(self.lbl_badge)
         v.addLayout(top)
 
         self.lbl_state = QtWidgets.QLabel("bereit für Auftrag")
-        self.lbl_state.setStyleSheet(f"color: {COL_TEXT_MUTED}; font-size: 12px;")
+        self.lbl_state.setStyleSheet(f"color: {COL_TEXT_MUTED}; font-size: 11px;")
         v.addWidget(self.lbl_state)
         v.addStretch()
 
         self.btn = QtWidgets.QPushButton("Plattenwechsel starten")
         self.btn.setObjectName("primary")
-        self.btn.setMinimumHeight(42)
+        self.btn.setMinimumHeight(32)
         self.btn.clicked.connect(lambda: self.clicked.emit(self.drucker_id))
         v.addWidget(self.btn)
 
@@ -238,8 +238,8 @@ class DruckerKachel(QtWidgets.QFrame):
             border-radius: 10px; }}""")
         self.lbl_badge.setStyleSheet(f"""
             background: {badge_bg}; color: {badge_fg};
-            border-radius: 4px; padding: 3px 8px;
-            font-size: 10px; font-weight: 600; letter-spacing: 0.5px;""")
+            border-radius: 4px; padding: 2px 6px;
+            font-size: 9px; font-weight: 600; letter-spacing: 0.5px;""")
         self.lbl_state.setStyleSheet(f"color: {sub_col}; font-size: 12px;")
         self.lbl_state.setText(sub)
         self.lbl_badge.setText(badge)
@@ -254,7 +254,7 @@ class DruckerEditor(QtWidgets.QFrame):
     saved = QtCore.pyqtSignal(object)
     deleted = QtCore.pyqtSignal(int)
 
-    def __init__(self, dc: DruckerConfig):
+    def __init__(self, dc: DruckerConfig, hide_delete: bool = False):
         super().__init__()
         self.setObjectName("card")
         self._dc = dc
@@ -325,10 +325,11 @@ class DruckerEditor(QtWidgets.QFrame):
         bs.clicked.connect(self._save)
         row.addWidget(bs)
 
-        bd = QtWidgets.QPushButton("Drucker entfernen")
-        bd.setObjectName("danger")
-        bd.clicked.connect(self._del)
-        row.addWidget(bd)
+        if not hide_delete:
+            bd = QtWidgets.QPushButton("Drucker entfernen")
+            bd.setObjectName("danger")
+            bd.clicked.connect(self._del)
+            row.addWidget(bd)
         v.addLayout(row)
 
     def _save(self):
@@ -353,6 +354,64 @@ class DruckerEditor(QtWidgets.QFrame):
             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
         if confirm == QtWidgets.QMessageBox.Yes:
             self.deleted.emit(self._dc.id)
+
+
+# ============================================================
+# Drucker-Konfig-Kachel (Drucker-Tab)
+# ============================================================
+class DruckerKonfigKachel(QtWidgets.QFrame):
+    clicked = QtCore.pyqtSignal(int)
+
+    def __init__(self, dc: DruckerConfig):
+        super().__init__()
+        self.drucker_id = dc.id
+        self.setCursor(QtCore.Qt.PointingHandCursor)
+        self.setMinimumHeight(110)
+        self._apply_style(False)
+
+        v = QtWidgets.QVBoxLayout(self)
+        v.setContentsMargins(12, 10, 12, 10); v.setSpacing(4)
+
+        top = QtWidgets.QHBoxLayout()
+        lbl_name = QtWidgets.QLabel(dc.name or f"Drucker {dc.id}")
+        lbl_name.setStyleSheet(f"color: {COL_TEXT}; font-size: 14px; font-weight: 600;")
+        top.addWidget(lbl_name, stretch=1)
+        badge = QtWidgets.QLabel(f"#{dc.id}")
+        badge.setStyleSheet(f"background: {COL_DHBW_RED}; color: white; "
+                            "border-radius: 4px; padding: 2px 7px; "
+                            "font-size: 10px; font-weight: 600;")
+        top.addWidget(badge)
+        v.addLayout(top)
+
+        v.addWidget(self._dim(f"X: {dc.pos_x} mm"))
+        v.addWidget(self._dim(f"Z Anfahr: {dc.pos_z_anfahr} mm  ·  Tür: {dc.pos_z_tuer} mm"))
+        v.addWidget(self._dim(f"Pin Fertig: {dc.pin_fertig}"))
+        v.addStretch()
+
+        hint = QtWidgets.QLabel("✎ antippen zum Bearbeiten")
+        hint.setStyleSheet(f"color: {COL_TEXT_MUTED}; font-size: 10px;")
+        v.addWidget(hint)
+
+    def _dim(self, text: str) -> QtWidgets.QLabel:
+        l = QtWidgets.QLabel(text)
+        l.setStyleSheet(f"color: {COL_TEXT_MUTED}; font-size: 11px;")
+        return l
+
+    def _apply_style(self, hover: bool):
+        bg = "#3F4148" if hover else COL_BG_CARD
+        self.setStyleSheet(f"DruckerKonfigKachel {{ background: {bg}; "
+                           f"border: 1px solid {COL_BORDER}; border-radius: 10px; }}")
+
+    def enterEvent(self, ev):
+        self._apply_style(True); super().enterEvent(ev)
+
+    def leaveEvent(self, ev):
+        self._apply_style(False); super().leaveEvent(ev)
+
+    def mousePressEvent(self, ev):
+        if ev.button() == QtCore.Qt.LeftButton:
+            self.clicked.emit(self.drucker_id)
+        super().mousePressEvent(ev)
 
 
 # ============================================================
@@ -431,8 +490,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self._aktive_seite = "status"
         self._kacheln: dict = {}
+        self._drucker_kacheln: dict = {}
         self._switch("status")
-        self._rebuild_drucker_editoren()
+        self._rebuild_drucker_kacheln()
         self._rebuild_kacheln()
         self._refresh()
 
@@ -454,6 +514,12 @@ class MainWindow(QtWidgets.QMainWindow):
                             "font-weight: 600; letter-spacing: 1px;")
             v.addWidget(t)
         return c
+
+    def _section_lbl(self, text: str) -> QtWidgets.QLabel:
+        l = QtWidgets.QLabel(text)
+        l.setStyleSheet(f"color: {COL_TEXT_MUTED}; font-size: 11px; "
+                        "font-weight: 600; letter-spacing: 1px;")
+        return l
 
     def _kv(self, label: str, value: str = "—") -> QtWidgets.QWidget:
         w = QtWidgets.QWidget()
@@ -670,12 +736,14 @@ class MainWindow(QtWidgets.QMainWindow):
         v.addWidget(self.service_banner)
 
         # Schlitten zu Drucker fahren
-        self.fahre_drucker_card = self._make_card("SCHLITTEN ZU DRUCKER FAHREN")
-        v.addWidget(self.fahre_drucker_card)
+        v.addWidget(self._section_lbl("SCHLITTEN ZU DRUCKER FAHREN"))
+        self.fahre_drucker_w = QtWidgets.QWidget()
+        _flay = QtWidgets.QVBoxLayout(self.fahre_drucker_w)
+        _flay.setContentsMargins(0, 0, 0, 0); _flay.setSpacing(8)
+        v.addWidget(self.fahre_drucker_w)
 
         # Schlitten zu Sonderpositionen
-        sp_card = self._make_card("WEITERE POSITIONEN")
-        sl = sp_card.layout()
+        v.addWidget(self._section_lbl("WEITERE POSITIONEN"))
         sp_row = QtWidgets.QGridLayout(); sp_row.setSpacing(8)
         for i, (label, key) in enumerate([
             ("Home", "home"), ("Ablage", "ablage"), ("Magazin", "magazin")
@@ -683,18 +751,17 @@ class MainWindow(QtWidgets.QMainWindow):
             btn = QtWidgets.QPushButton(label); btn.setMinimumHeight(40)
             btn.clicked.connect(lambda _, k=key, n=label: self._on_service_pos(k, n))
             sp_row.addWidget(btn, 0, i)
+            sp_row.setColumnStretch(i, 1)
             setattr(self, f"btn_pos_{key}", btn)
-        sl.addLayout(sp_row)
-        v.addWidget(sp_card)
+        sp_w = QtWidgets.QWidget(); sp_w.setLayout(sp_row)
+        v.addWidget(sp_w)
 
         # Referenzfahrt
-        ref_card = self._make_card("REFERENZFAHRT")
-        rl = ref_card.layout()
+        v.addWidget(self._section_lbl("REFERENZFAHRT"))
         self.btn_referenz = QtWidgets.QPushButton("Referenzfahrt durchführen")
         self.btn_referenz.setObjectName("primary")
         self.btn_referenz.clicked.connect(self._on_referenzfahrt)
-        rl.addWidget(self.btn_referenz)
-        v.addWidget(ref_card)
+        v.addWidget(self.btn_referenz)
 
         v.addStretch()
         return page
@@ -710,22 +777,22 @@ class MainWindow(QtWidgets.QMainWindow):
         title = QtWidgets.QLabel("Drucker-Konfiguration")
         title.setStyleSheet(f"color: {COL_TEXT}; font-size: 20px; font-weight: 600;")
         v.addWidget(title)
-        sub = QtWidgets.QLabel("Positionen, Pins und Werte pro Drucker. "
+        sub = QtWidgets.QLabel("Kachel antippen um Drucker zu bearbeiten oder zu löschen. "
                                 "Änderungen werden direkt in die config.yaml gespeichert.")
         sub.setStyleSheet(f"color: {COL_TEXT_MUTED}; font-size: 12px;")
         sub.setWordWrap(True)
         v.addWidget(sub)
 
         btn_add = QtWidgets.QPushButton("➕  Neuen Drucker hinzufügen")
-        btn_add.setObjectName("primary"); btn_add.setMinimumHeight(46)
+        btn_add.setObjectName("primary"); btn_add.setMinimumHeight(44)
         btn_add.clicked.connect(self._on_drucker_add)
         v.addWidget(btn_add)
 
-        self.drucker_container = QtWidgets.QWidget()
-        self.drucker_container_lay = QtWidgets.QVBoxLayout(self.drucker_container)
-        self.drucker_container_lay.setContentsMargins(0, 0, 0, 0)
-        self.drucker_container_lay.setSpacing(12)
-        v.addWidget(self.drucker_container)
+        self.drucker_kacheln_w = QtWidgets.QWidget()
+        self.drucker_kacheln_grid = QtWidgets.QGridLayout(self.drucker_kacheln_w)
+        self.drucker_kacheln_grid.setSpacing(12)
+        self.drucker_kacheln_grid.setAlignment(QtCore.Qt.AlignTop)
+        v.addWidget(self.drucker_kacheln_w, stretch=1)
         v.addStretch()
         return page
 
@@ -849,24 +916,36 @@ class MainWindow(QtWidgets.QMainWindow):
             l.setAlignment(QtCore.Qt.AlignCenter)
             layout.addWidget(l)
             return
-        for dc in druckers:
+
+        grid_w = QtWidgets.QWidget()
+        grid = QtWidgets.QGridLayout(grid_w)
+        grid.setSpacing(8); grid.setContentsMargins(0, 0, 0, 0)
+
+        for idx, dc in enumerate(druckers):
             did = dc["id"]
             status = ds.get(did, "bereit")
-            row = QtWidgets.QFrame()
-            border = self._d_color(status)
-            row.setStyleSheet(f"""QFrame {{ background: {COL_BG_SUNK};
-                border-left: 3px solid {border};
+            color = self._d_color(status)
+
+            card = QtWidgets.QFrame()
+            card.setStyleSheet(f"""QFrame {{ background: {COL_BG_SUNK};
+                border: none; border-left: 3px solid {color};
                 border-radius: 4px; }}""")
-            h = QtWidgets.QHBoxLayout(row)
-            h.setContentsMargins(12, 8, 12, 8); h.setSpacing(10)
+            h = QtWidgets.QHBoxLayout(card)
+            h.setContentsMargins(10, 8, 10, 8); h.setSpacing(8)
+
             n = QtWidgets.QLabel(dc.get("name") or f"Drucker {did}")
             n.setStyleSheet(f"color: {COL_TEXT}; font-size: 13px; font-weight: 500;")
-            n.setMinimumWidth(120)
-            h.addWidget(n)
+            h.addWidget(n, stretch=1)
+
             st = QtWidgets.QLabel(DRUCKER_STATUS_TEXT.get(status, status))
-            st.setStyleSheet(f"color: {self._d_color(status)}; font-size: 12px;")
-            h.addWidget(st, stretch=1)
-            layout.addWidget(row)
+            st.setStyleSheet(f"color: {color}; font-size: 11px;")
+            h.addWidget(st)
+
+            grid.addWidget(card, idx // 4, idx % 4)
+
+        for col in range(4):
+            grid.setColumnStretch(col, 1)
+        layout.addWidget(grid_w)
 
     def _rebuild_kacheln(self):
         while self.manuell_grid.count():
@@ -887,10 +966,10 @@ class MainWindow(QtWidgets.QMainWindow):
         for idx, dc in enumerate(druckers):
             kachel = DruckerKachel(dc)
             kachel.clicked.connect(self._on_kachel_clicked)
-            self.manuell_grid.addWidget(kachel, idx // 2, idx % 2)
+            self.manuell_grid.addWidget(kachel, idx // 4, idx % 4)
             self._kacheln[dc.id] = kachel
-        self.manuell_grid.setColumnStretch(0, 1)
-        self.manuell_grid.setColumnStretch(1, 1)
+        for col in range(4):
+            self.manuell_grid.setColumnStretch(col, 1)
 
     def _refresh_manuell(self, snap):
         ds = snap["drucker_status"]
@@ -937,26 +1016,30 @@ class MainWindow(QtWidgets.QMainWindow):
             btn.setEnabled(service_active)
 
         # Drucker-Buttons
-        layout = self.fahre_drucker_card.layout()
-        while layout.count() > 1:
-            item = layout.takeAt(1)
+        lay = self.fahre_drucker_w.layout()
+        while lay.count():
+            item = lay.takeAt(0)
             if item.widget(): item.widget().deleteLater()
         druckers = self.hauptablauf.config.drucker_liste()
         if not druckers:
             l = QtWidgets.QLabel("— kein Drucker konfiguriert —")
             l.setStyleSheet(f"color: {COL_TEXT_MUTED};")
             l.setAlignment(QtCore.Qt.AlignCenter)
-            layout.addWidget(l)
+            lay.addWidget(l)
         else:
-            grid = QtWidgets.QGridLayout(); grid.setSpacing(8)
+            grid_w = QtWidgets.QWidget()
+            grid = QtWidgets.QGridLayout(grid_w)
+            grid.setContentsMargins(0, 0, 0, 0); grid.setSpacing(8)
             for i, d in enumerate(druckers):
                 btn = QtWidgets.QPushButton(d.name or f"Drucker {d.id}")
                 btn.setMinimumHeight(40)
                 btn.setEnabled(service_active)
                 btn.clicked.connect(
                     lambda _, did=d.id: self._on_service_drucker(did))
-                grid.addWidget(btn, i // 2, i % 2)
-            layout.addLayout(grid)
+                grid.addWidget(btn, i // 4, i % 4)
+            for col in range(4):
+                grid.setColumnStretch(col, 1)
+            lay.addWidget(grid_w)
 
     def _refresh_fehler(self, snap):
         f = snap["fehler"]
@@ -994,36 +1077,85 @@ class MainWindow(QtWidgets.QMainWindow):
                 "in_queue": COL_WARN, "aktiv": COL_DHBW_RED}.get(s, COL_TEXT_MUTED)
 
     # ============================================================
-    # Drucker-Editoren
+    # Drucker-Kacheln (Drucker-Tab)
     # ============================================================
-    def _rebuild_drucker_editoren(self):
-        while self.drucker_container_lay.count():
-            item = self.drucker_container_lay.takeAt(0)
+    def _rebuild_drucker_kacheln(self):
+        while self.drucker_kacheln_grid.count():
+            item = self.drucker_kacheln_grid.takeAt(0)
             if item.widget(): item.widget().deleteLater()
-        for d in self.hauptablauf.config.drucker_liste():
-            ed = DruckerEditor(d)
-            ed.saved.connect(self._on_drucker_saved)
-            ed.deleted.connect(self._on_drucker_deleted)
-            self.drucker_container_lay.addWidget(ed)
+        self._drucker_kacheln.clear()
+
+        druckers = self.hauptablauf.config.drucker_liste()
+        if not druckers:
+            l = QtWidgets.QLabel(
+                "Noch kein Drucker konfiguriert.\n"
+                "Oben '+' drücken um einen anzulegen.")
+            l.setAlignment(QtCore.Qt.AlignCenter)
+            l.setStyleSheet(f"color: {COL_TEXT_MUTED}; padding: 30px;")
+            self.drucker_kacheln_grid.addWidget(l, 0, 0)
+            return
+
+        for idx, dc in enumerate(druckers):
+            kachel = DruckerKonfigKachel(dc)
+            kachel.clicked.connect(self._on_drucker_kachel_clicked)
+            self.drucker_kacheln_grid.addWidget(kachel, idx // 4, idx % 4)
+            self._drucker_kacheln[dc.id] = kachel
+        for col in range(4):
+            self.drucker_kacheln_grid.setColumnStretch(col, 1)
+
+    def _on_drucker_kachel_clicked(self, drucker_id: int):
+        dc = self.hauptablauf.config.drucker(drucker_id)
+        if dc is None: return
+        self._open_drucker_editor(dc)
+
+    def _open_drucker_editor(self, dc: DruckerConfig, hide_delete: bool = False):
+        dlg = QtWidgets.QDialog(self)
+        dlg.setWindowTitle(f"Drucker {dc.id} — {dc.name or f'Drucker {dc.id}'}")
+        dlg.setModal(True)
+        dlg.setMinimumWidth(460)
+        dlg.setStyleSheet(STYLESHEET)
+
+        v = QtWidgets.QVBoxLayout(dlg)
+        v.setContentsMargins(0, 0, 0, 0); v.setSpacing(0)
+
+        editor = DruckerEditor(dc, hide_delete=hide_delete)
+        v.addWidget(editor)
+
+        sep = QtWidgets.QFrame(); sep.setFixedHeight(1)
+        sep.setStyleSheet(f"background: {COL_BORDER};")
+        v.addWidget(sep)
+
+        wrap = QtWidgets.QWidget()
+        wl = QtWidgets.QHBoxLayout(wrap)
+        wl.setContentsMargins(16, 10, 16, 12)
+        btn_cancel = QtWidgets.QPushButton("Abbrechen")
+        btn_cancel.clicked.connect(dlg.reject)
+        wl.addWidget(btn_cancel)
+        v.addWidget(wrap)
+
+        def on_saved(new_dc):
+            self.hauptablauf.config.drucker_setzen(new_dc)
+            self._toast("Gespeichert", f"Drucker {new_dc.id}")
+            dlg.accept()
+
+        def on_deleted(did):
+            if self.hauptablauf.config.drucker_entfernen(did):
+                self._toast("Entfernt", f"Drucker {did}")
+            dlg.accept()
+
+        editor.saved.connect(on_saved)
+        editor.deleted.connect(on_deleted)
+        dlg.exec_()
 
     def _on_config_changed(self):
-        self._rebuild_drucker_editoren()
+        self._rebuild_drucker_kacheln()
         self._rebuild_kacheln()
         self._refresh()
 
-    def _on_drucker_saved(self, dc: DruckerConfig):
-        self.hauptablauf.config.drucker_setzen(dc)
-        self._toast("Gespeichert", f"Drucker {dc.id}")
-
-    def _on_drucker_deleted(self, did: int):
-        if self.hauptablauf.config.drucker_entfernen(did):
-            self._toast("Entfernt", f"Drucker {did}")
-
     def _on_drucker_add(self):
         new_id = self.hauptablauf.config.naechste_freie_drucker_id()
-        self.hauptablauf.config.drucker_setzen(
-            DruckerConfig(id=new_id, name=f"Drucker {new_id}"))
-        self._toast("Hinzugefügt", f"Drucker {new_id}")
+        new_dc = DruckerConfig(id=new_id, name=f"Drucker {new_id}")
+        self._open_drucker_editor(new_dc, hide_delete=True)
 
     # ============================================================
     # Action-Handler

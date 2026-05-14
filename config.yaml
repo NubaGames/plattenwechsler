@@ -1,7 +1,6 @@
 system:
   log_level: DEBUG
   log_file: /home/nura/plattenwechsler/plattenwechsler.log
-
 esp:
   port: /dev/ttyUSB0
   baud: 115200
@@ -12,10 +11,7 @@ esp:
   mech_timeout_s: 10.0
   heartbeat_timeout_s: 5.0
   reconnect_intervall_s: 2.0
-  # Auf true setzen solange Endschalter noch nicht verdrahtet sind.
-  # Der Pi sendet dann kein HOME und setzt den ESP direkt auf READY.
   skip_homing: false
-
 gpio:
   endschalter:
     x: 24
@@ -23,73 +19,75 @@ gpio:
   not_aus:
     pin: 26
     invert: false
-
-# Drucker-Liste — wird über UI/Web bearbeitet, automatisch hier gespeichert
 drucker:
-  - id: 1
-    name: Drucker 1
-    pin_fertig: 17
-    pos_x: 100
-    pos_z_anfahr: 200
-    pos_z_tuer: 220
-    pos_z_druckbett: 50
-    door_arm_hub_mm: 50
-    gripper_depth: 120
-    lift_offset: 8
-  - id: 2
-    name: Drucker 2
-    pin_fertig: 27
-    pos_x: 200
-    pos_z_anfahr: 200
-    pos_z_tuer: 220
-    pos_z_druckbett: 50
-    door_arm_hub_mm: 50
-    gripper_depth: 120
-    lift_offset: 8
-  - id: 3
-    name: Drucker 3
-    pin_fertig: 22
-    pos_x: 200
-    pos_z_anfahr: 100
-    pos_z_tuer: 120
-    pos_z_druckbett: 50
-    door_arm_hub_mm: 50
-    gripper_depth: 120
-    lift_offset: 8
-  - id: 4
-    name: Drucker 4
-    pin_fertig: 23
-    pos_x: 100
-    pos_z_anfahr: 100
-    pos_z_tuer: 120
-    pos_z_druckbett: 50
-    door_arm_hub_mm: 50
-    gripper_depth: 120
-    lift_offset: 8
-
+- id: 1
+  name: Drucker 1
+  pin_fertig: 17
+  pos_x: 100
+  pos_z_anfahr: 200
+  pos_z_tuer: 220
+  pos_z_druckbett: 50
+  door_arm_hub_mm: 50
+  gripper_depth: 120
+  lift_offset: 8
+- id: 2
+  name: Drucker 2
+  pin_fertig: 27
+  pos_x: 200
+  pos_z_anfahr: 200
+  pos_z_tuer: 220
+  pos_z_druckbett: 50
+  door_arm_hub_mm: 50
+  gripper_depth: 120
+  lift_offset: 8
+- id: 3
+  name: Drucker 3
+  pin_fertig: 22
+  pos_x: 200
+  pos_z_anfahr: 100
+  pos_z_tuer: 120
+  pos_z_druckbett: 50
+  door_arm_hub_mm: 50
+  gripper_depth: 120
+  lift_offset: 8
+- id: 4
+  name: Drucker 4
+  pin_fertig: 23
+  pos_x: 100
+  pos_z_anfahr: 100
+  pos_z_tuer: 120
+  pos_z_druckbett: 50
+  door_arm_hub_mm: 50
+  gripper_depth: 120
+  lift_offset: 8
 positionen:
-  ablage:  { x: 20, z: 20, gripper_depth: 120, lift_offset: 8 }
-  magazin: { x: 50, z: 50, gripper_depth: 120, lift_offset: 8 }
-
+  ablage:
+    x: 20
+    z: 20
+    gripper_depth: 120
+    lift_offset: 8
+  magazin:
+    x: 50
+    z: 50
+    gripper_depth: 120
+    lift_offset: 8
 mqtt:
   enabled: true
-  broker_host: "localhost"
+  broker_host: localhost
   broker_port: 1883
-  username: ""
-  password: ""
-  client_id: "plattenwechsler-pi"
-  base_topic: "plattenwechsler"
+  username: ''
+  password: ''
+  client_id: plattenwechsler-pi
+  base_topic: plattenwechsler
   qos: 1
   retain_status: true
   reconnect_intervall_s: 5.0
-
 telegram:
   enabled: true
-  bot_token: "8738312124:AAEtGA1zwQ4AZEYSBdRRei5qt2nO69m-akA"
+  bot_token: 8738312124:AAEtGA1zwQ4AZEYSBdRRei5qt2nO69m-akA
   allowed_chat_ids:
-    - 8784408821
+  - 8784408821
   send_status_to_first: true
-
 hmi:
   fullscreen: true
   width: 1280
