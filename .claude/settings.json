@@ -9,7 +9,17 @@
       "Bash(python3 -c \"import plattenwechsler.ui.main_window\")",
       "Bash(python3 -c \"import docx; print\\('ok'\\)\")",
       "Bash(pip3 show *)",
-      "Bash(xargs cat -n)"
+      "Bash(xargs cat -n)",
+      "Read(//home/nura/Desktop/**)",
+      "Bash(python3 -c \"import gpiozero; print\\(gpiozero.__version__\\)\")",
+      "Bash(chmod +x /home/nura/plattenwechsler/start.sh)",
+      "Bash(mkdir -p /home/nura/Desktop)",
+      "Bash(chmod +x /home/nura/Desktop/Plattenwechsler.desktop)",
+      "Bash(gio set *)",
+      "Bash(xattr -w com.apple.quarantine \"\" /home/nura/Desktop/Plattenwechsler.desktop)"
+    ],
+    "additionalDirectories": [
+      "/home/nura/Desktop"
     ]
   }
 }
