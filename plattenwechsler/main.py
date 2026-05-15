@@ -9,6 +9,7 @@ Aufruf:
 from __future__ import annotations
 
 import argparse
+import atexit
 import logging
 import signal
 import sys
@@ -163,7 +164,12 @@ def main() -> int:
     if tg_client:   tg_client.start()
     hauptablauf.start()
 
+    _shutdown_done = False
     def _shutdown(*_):
+        nonlocal _shutdown_done
+        if _shutdown_done:
+            return
+        _shutdown_done = True
         logger.info("Shutdown")
         try: hauptablauf.stop()
         except Exception: pass
@@ -177,8 +183,10 @@ def main() -> int:
         if tg_client:
             try: tg_client.stop()
             except Exception: pass
-    signal.signal(signal.SIGINT, _shutdown)
+    signal.signal(signal.SIGINT,  _shutdown)
     signal.signal(signal.SIGTERM, _shutdown)
+    signal.signal(signal.SIGHUP,  _shutdown)  # Terminal geschlossen
+    atexit.register(_shutdown)                 # Sicherheitsnetz für normale Exits
 
     if args.no_gui:
         try: signal.pause()
