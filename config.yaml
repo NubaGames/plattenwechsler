@@ -43,7 +43,7 @@ drucker:
 - id: 3
   name: Drucker 3
   pin_fertig: 22
-  pos_x: 180
+  pos_x: 200
   pos_z_anfahr: 100
   pos_z_tuer: 120
   pos_z_druckbett: 50

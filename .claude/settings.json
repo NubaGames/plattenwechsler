@@ -16,10 +16,27 @@
       "Bash(mkdir -p /home/nura/Desktop)",
       "Bash(chmod +x /home/nura/Desktop/Plattenwechsler.desktop)",
       "Bash(gio set *)",
-      "Bash(xattr -w com.apple.quarantine \"\" /home/nura/Desktop/Plattenwechsler.desktop)"
+      "Bash(xattr -w com.apple.quarantine \"\" /home/nura/Desktop/Plattenwechsler.desktop)",
+      "Read(//etc/mosquitto/**)",
+      "Read(//etc/mosquitto/conf.d/**)",
+      "Bash(mosquitto -v)",
+      "Bash(mosquitto --help)",
+      "Bash(sudo tee /etc/mosquitto/conf.d/plattenwechsler.conf)",
+      "Bash(sudo -S tee /etc/mosquitto/conf.d/plattenwechsler.conf)",
+      "Bash(systemctl is-active *)",
+      "Bash(mosquitto_pub -h localhost -p 1883 -t \"plattenwechsler/cmd/status_request\" -m \"{}\")",
+      "Bash(mosquitto_sub -h localhost -p 1883 -t \"plattenwechsler/#\" -C 3 -W 3)",
+      "Bash(mosquitto_sub -h localhost -p 1883 -t \"plattenwechsler/response\" -C 1 -W 2)",
+      "Bash(mosquitto_pub -h localhost -p 1883 -t \"plattenwechsler/cmd/quittieren\" -m \"{}\")",
+      "Bash(wait)",
+      "Bash(mosquitto_sub -h localhost -p 1883 -t \"plattenwechsler/status/system\" -C 1 -W 2)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('State:', d['system_state']\\); print\\('Fehler:', d['fehler']\\)\")",
+      "Read(//home/nura/.config/labwc/**)",
+      "Read(//home/nura/.config/lxsession/LXDE-pi/**)"
     ],
     "additionalDirectories": [
-      "/home/nura/Desktop"
+      "/home/nura/Desktop",
+      "/home/nura/.config/labwc"
     ]
   }
 }
