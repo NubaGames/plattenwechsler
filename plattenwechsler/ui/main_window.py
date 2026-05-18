@@ -18,6 +18,7 @@ from typing import Optional
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ..core.hauptablauf import Hauptablauf
+from ..config import Position
 from ..types import (
     SystemState, AuftragQuelle, DruckerStatus, DruckerConfig,
 )
@@ -259,81 +260,125 @@ class DruckerEditor(QtWidgets.QFrame):
         super().__init__()
         self._dc = dc
 
-        v = QtWidgets.QVBoxLayout(self)
-        v.setContentsMargins(20, 18, 20, 18); v.setSpacing(10)
+        root = QtWidgets.QVBoxLayout(self)
+        root.setContentsMargins(14, 10, 14, 10); root.setSpacing(6)
 
-        title = QtWidgets.QLabel(f"Drucker {dc.id}")
-        title.setStyleSheet(f"color: {COL_TEXT}; font-size: 15px; font-weight: 600;")
-        v.addWidget(title)
-
-        form = QtWidgets.QGridLayout()
-        form.setHorizontalSpacing(10); form.setVerticalSpacing(7)
-        form.setColumnStretch(1, 1); form.setColumnStretch(3, 1)
-
-        def lbl(t):
-            l = QtWidgets.QLabel(t)
-            l.setStyleSheet(f"color: {COL_TEXT_MUTED}; font-size: 12px;")
-            return l
-
-        # Name — volle Breite
+        # Name + Pin Fertig ganz oben
         self.f_name = QtWidgets.QLineEdit(dc.name)
-        form.addWidget(lbl("Name"), 0, 0)
-        form.addWidget(self.f_name, 0, 1, 1, 3)
+        self.f_pin  = self._spin(0, 40, dc.pin_fertig, "BCM")
+        top = QtWidgets.QHBoxLayout(); top.setSpacing(8)
+        lbl_n = QtWidgets.QLabel("Name")
+        lbl_n.setStyleSheet(f"color: {COL_TEXT_DIM}; font-size: 12px;")
+        lbl_n.setFixedWidth(82)
+        lbl_p = QtWidgets.QLabel("Pin Fertig")
+        lbl_p.setStyleSheet(f"color: {COL_TEXT_DIM}; font-size: 12px;")
+        top.addWidget(lbl_n)
+        top.addWidget(self.f_name, stretch=1)
+        top.addSpacing(16)
+        top.addWidget(lbl_p)
+        top.addWidget(self.f_pin)
+        root.addLayout(top)
 
-        # Pin + X
-        self.f_pin = QtWidgets.QSpinBox()
-        self.f_pin.setRange(0, 40); self.f_pin.setValue(dc.pin_fertig)
-        self.f_pin.setSuffix(" BCM")
-        self.f_pos_x = QtWidgets.QSpinBox()
-        self.f_pos_x.setRange(0, 5000); self.f_pos_x.setValue(dc.pos_x)
-        self.f_pos_x.setSuffix(" mm")
-        form.addWidget(lbl("Pin Fertig"), 1, 0); form.addWidget(self.f_pin, 1, 1)
-        form.addWidget(lbl("X-Position"), 1, 2); form.addWidget(self.f_pos_x, 1, 3)
+        # Tab-Leiste
+        tab_row = QtWidgets.QHBoxLayout(); tab_row.setSpacing(0)
+        self._tab_btns: list = []
+        for i, label in enumerate(["Positionen", "Tür / Greifer"]):
+            btn = QtWidgets.QPushButton(label)
+            btn.setFixedHeight(34)
+            btn.setFocusPolicy(QtCore.Qt.NoFocus)
+            btn.clicked.connect(lambda _, idx=i: self._show_page(idx))
+            tab_row.addWidget(btn)
+            self._tab_btns.append(btn)
+        root.addLayout(tab_row)
 
-        # Z Anfahr + Z Tür
-        self.f_anfahr = QtWidgets.QSpinBox()
-        self.f_anfahr.setRange(0, 2000); self.f_anfahr.setValue(dc.pos_z_anfahr)
-        self.f_anfahr.setSuffix(" mm")
-        self.f_tuer = QtWidgets.QSpinBox()
-        self.f_tuer.setRange(0, 2000); self.f_tuer.setValue(dc.pos_z_tuer)
-        self.f_tuer.setSuffix(" mm")
-        form.addWidget(lbl("Z Anfahrt"), 2, 0); form.addWidget(self.f_anfahr, 2, 1)
-        form.addWidget(lbl("Z Türarm"),  2, 2); form.addWidget(self.f_tuer,   2, 3)
+        # Felder
+        self.f_pos_x  = self._spin(0, 5000, dc.pos_x,           "mm")
+        self.f_anfahr = self._spin(0, 2000, dc.pos_z_anfahr,     "mm")
+        self.f_bett   = self._spin(0, 2000, dc.pos_z_druckbett,  "mm")
+        self.f_tuer   = self._spin(0, 2000, dc.pos_z_tuer,       "mm")
+        self.f_hub    = self._spin(0,  500, dc.door_arm_hub_mm,  "mm")
+        self.f_gd     = self._spin(0,  500, dc.gripper_depth,    "mm")
+        self.f_lo     = self._spin(0,  100, dc.lift_offset,      "mm")
+        self.f_ph1    = self._spin(0,  999, 0, "")
+        self.f_ph2    = self._spin(0,  999, 0, "")
 
-        # Z Bett + Türarm-Hub
-        self.f_bett = QtWidgets.QSpinBox()
-        self.f_bett.setRange(0, 2000); self.f_bett.setValue(dc.pos_z_druckbett)
-        self.f_bett.setSuffix(" mm")
-        self.f_hub = QtWidgets.QSpinBox()
-        self.f_hub.setRange(0, 500); self.f_hub.setValue(dc.door_arm_hub_mm)
-        self.f_hub.setSuffix(" mm")
-        form.addWidget(lbl("Z Druckbett"),  3, 0); form.addWidget(self.f_bett, 3, 1)
-        form.addWidget(lbl("Türarm-Hub"),   3, 2); form.addWidget(self.f_hub,  3, 3)
+        # Seite 1: Positionen — alle drei Positionswerte in einer Zeile
+        p1 = QtWidgets.QWidget()
+        p1_lay = QtWidgets.QVBoxLayout(p1)
+        p1_lay.setContentsMargins(0, 4, 0, 0); p1_lay.setSpacing(6)
+        p1_lay.addLayout(self._grid_row(
+            ("X-Position",  self.f_pos_x),
+            ("Z Anfahrt",   self.f_anfahr),
+            ("Z Druckbett", self.f_bett)))
+        p1_lay.addStretch()
 
-        # Greifer + Hub-Offset
-        self.f_gd = QtWidgets.QSpinBox()
-        self.f_gd.setRange(0, 500); self.f_gd.setValue(dc.gripper_depth)
-        self.f_gd.setSuffix(" mm")
-        self.f_lo = QtWidgets.QSpinBox()
-        self.f_lo.setRange(0, 100); self.f_lo.setValue(dc.lift_offset)
-        self.f_lo.setSuffix(" mm")
-        form.addWidget(lbl("Greifer-Tiefe"), 4, 0); form.addWidget(self.f_gd, 4, 1)
-        form.addWidget(lbl("Hub-Offset"),    4, 2); form.addWidget(self.f_lo, 4, 3)
+        # Seite 2: Tür & Greifer — Pin Fertig gehört hierher
+        p2 = QtWidgets.QWidget()
+        p2_lay = QtWidgets.QVBoxLayout(p2)
+        p2_lay.setContentsMargins(0, 4, 0, 0); p2_lay.setSpacing(6)
+        p2_lay.addLayout(self._grid_row(
+            ("Z Türarm",      self.f_tuer), ("Türarm-Hub",    self.f_hub), ("Platzhalter 1", self.f_ph1)))
+        p2_lay.addLayout(self._grid_row(
+            ("Greifer",       self.f_gd),   ("Hub-Offset",    self.f_lo),  ("Platzhalter 2", self.f_ph2)))
+        p2_lay.addStretch()
 
-        v.addLayout(form)
+        self._stack = QtWidgets.QStackedWidget()
+        self._stack.addWidget(p1)
+        self._stack.addWidget(p2)
+        root.addWidget(self._stack, stretch=1)
 
-        row = QtWidgets.QHBoxLayout()
+        # Speichern / Entfernen
+        btn_row = QtWidgets.QHBoxLayout(); btn_row.setSpacing(10)
         bs = QtWidgets.QPushButton("Speichern")
-        bs.setObjectName("primary")
+        bs.setObjectName("primary"); bs.setMinimumHeight(44)
         bs.clicked.connect(self._save)
-        row.addWidget(bs)
-
+        btn_row.addWidget(bs)
         if not hide_delete:
             bd = QtWidgets.QPushButton("Drucker entfernen")
-            bd.setObjectName("danger")
+            bd.setObjectName("danger"); bd.setMinimumHeight(44)
             bd.clicked.connect(self._del)
-            row.addWidget(bd)
-        v.addLayout(row)
+            btn_row.addWidget(bd)
+        root.addLayout(btn_row)
+
+        self._show_page(0)
+
+    def _show_page(self, idx: int):
+        self._stack.setCurrentIndex(idx)
+        for i, btn in enumerate(self._tab_btns):
+            if i == idx:
+                btn.setStyleSheet(
+                    f"QPushButton {{ background: {COL_DHBW_RED}; color: white; "
+                    "border: none; border-radius: 0; font-size: 13px; font-weight: 600; }}")
+            else:
+                btn.setStyleSheet(
+                    f"QPushButton {{ background: {COL_BG_SUNK}; color: {COL_TEXT_DIM}; "
+                    f"border: none; border-bottom: 1px solid {COL_BORDER}; "
+                    "border-radius: 0; font-size: 13px; }}"
+                    f"QPushButton:pressed {{ background: {COL_BG_CARD}; }}")
+
+    def _spin(self, lo: int, hi: int, val: int, suffix: str) -> QtWidgets.QSpinBox:
+        s = QtWidgets.QSpinBox()
+        s.setRange(lo, hi); s.setValue(val); s.setSuffix(f" {suffix}")
+        return s
+
+    def _field_row(self, label: str, widget: QtWidgets.QWidget) -> QtWidgets.QHBoxLayout:
+        row = QtWidgets.QHBoxLayout(); row.setSpacing(8)
+        lbl = QtWidgets.QLabel(label)
+        lbl.setStyleSheet(f"color: {COL_TEXT_DIM}; font-size: 12px;")
+        lbl.setFixedWidth(82)
+        row.addWidget(lbl); row.addWidget(widget)
+        return row
+
+    def _grid_row(self, *pairs) -> QtWidgets.QHBoxLayout:
+        row = QtWidgets.QHBoxLayout(); row.setSpacing(12)
+        for label, widget in pairs:
+            lbl = QtWidgets.QLabel(label)
+            lbl.setStyleSheet(f"color: {COL_TEXT_DIM}; font-size: 12px;")
+            lbl.setFixedWidth(82)
+            pair = QtWidgets.QHBoxLayout(); pair.setSpacing(6)
+            pair.addWidget(lbl); pair.addWidget(widget)
+            row.addLayout(pair)
+        return row
 
     def _save(self):
         new_dc = DruckerConfig(
@@ -380,21 +425,21 @@ class OnScreenKeyboard(QtWidgets.QWidget):
         self.setStyleSheet(f"""
             QPushButton {{
                 background: {COL_BG_CARD}; color: {COL_TEXT};
-                border: 1px solid {COL_BORDER}; border-radius: 7px;
-                font-size: 17px; font-weight: 500;
+                border: 1px solid {COL_BORDER}; border-radius: 6px;
+                font-size: 14px; font-weight: 500;
             }}
             QPushButton:pressed {{ background: {COL_DHBW_RED}; border-color: {COL_DHBW_RED}; }}
-            QPushButton#spec {{ background: {COL_BG_SUNK}; font-size: 15px; }}
+            QPushButton#spec {{ background: {COL_BG_SUNK}; font-size: 12px; }}
         """)
         v = QtWidgets.QVBoxLayout(self)
-        v.setContentsMargins(12, 10, 12, 10); v.setSpacing(7)
+        v.setContentsMargins(10, 12, 10, 12); v.setSpacing(6)
 
         for row in self._ROWS:
-            h = QtWidgets.QHBoxLayout(); h.setSpacing(7)
+            h = QtWidgets.QHBoxLayout(); h.setSpacing(6)
             for key in row:
                 btn = QtWidgets.QPushButton(key)
                 btn.setFocusPolicy(QtCore.Qt.NoFocus)
-                btn.setFixedHeight(48)
+                btn.setFixedHeight(44)
                 is_spec = key in ("⌫", "↵", "⇧", "✕")
                 if is_spec:
                     btn.setObjectName("spec")
@@ -405,10 +450,10 @@ class OnScreenKeyboard(QtWidgets.QWidget):
             v.addLayout(h)
 
         # Leerzeichen
-        h_sp = QtWidgets.QHBoxLayout(); h_sp.setSpacing(7)
+        h_sp = QtWidgets.QHBoxLayout(); h_sp.setSpacing(6)
         sp = QtWidgets.QPushButton("Leerzeichen")
         sp.setFocusPolicy(QtCore.Qt.NoFocus)
-        sp.setFixedHeight(48)
+        sp.setFixedHeight(44)
         sp.clicked.connect(lambda: self._press(" "))
         h_sp.addWidget(sp)
         v.addLayout(h_sp)
@@ -883,6 +928,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.drucker_kacheln_grid.setSpacing(12)
         self.drucker_kacheln_grid.setAlignment(QtCore.Qt.AlignTop)
         v.addWidget(self.drucker_kacheln_w, stretch=1)
+
+        v.addWidget(self._section_lbl("SONDERPOSITIONEN"))
+        sonder_row = QtWidgets.QHBoxLayout(); sonder_row.setSpacing(12)
+        for name, label in [("ablage", "Ablage"), ("magazin", "Magazin")]:
+            card = self._make_sonder_kachel(name, label)
+            sonder_row.addWidget(card)
+        sonder_row.addStretch()
+        sonder_w = QtWidgets.QWidget(); sonder_w.setLayout(sonder_row)
+        v.addWidget(sonder_w)
+
         v.addStretch()
         return page
 
@@ -1211,35 +1266,34 @@ class MainWindow(QtWidgets.QMainWindow):
         mw = self.geometry()
 
         dlg = QtWidgets.QDialog(self)
-        dlg.setWindowTitle(f"Drucker {dc.id} — {dc.name or f'Drucker {dc.id}'}")
+        dlg.setWindowTitle(f"Drucker {dc.id}")
         dlg.setModal(True)
         dlg.setFixedSize(mw.width(), mw.height())
         dlg.move(mw.x(), mw.y())
-        dlg.setStyleSheet(STYLESHEET)
+        dlg.setStyleSheet(STYLESHEET + """
+            QSpinBox, QLineEdit { min-height: 38px; font-size: 13px; }
+            QSpinBox::up-button, QSpinBox::down-button { width: 34px; }
+        """)
 
-        v = QtWidgets.QVBoxLayout(dlg)
-        v.setContentsMargins(0, 0, 0, 0); v.setSpacing(0)
+        root = QtWidgets.QVBoxLayout(dlg)
+        root.setContentsMargins(0, 0, 0, 0); root.setSpacing(0)
 
-        # ── Formular-Bereich ──────────────────────────────────────
         editor = DruckerEditor(dc, hide_delete=hide_delete)
-        v.addWidget(editor)
+        root.addWidget(editor)
 
-        # ── Trennlinie ────────────────────────────────────────────
         sep = QtWidgets.QFrame(); sep.setFixedHeight(1)
         sep.setStyleSheet(f"background: {COL_BORDER};")
-        v.addWidget(sep)
+        root.addWidget(sep)
 
-        # ── Tastatur ──────────────────────────────────────────────
         kbd = OnScreenKeyboard()
-        v.addWidget(kbd, stretch=1)
+        root.addWidget(kbd, stretch=1)
 
-        # ── Abbrechen — flacher Streifen am unteren Rand ──────────
         sep2 = QtWidgets.QFrame(); sep2.setFixedHeight(1)
         sep2.setStyleSheet(f"background: {COL_BORDER};")
-        v.addWidget(sep2)
+        root.addWidget(sep2)
 
         btn_cancel = QtWidgets.QPushButton("✕  Abbrechen")
-        btn_cancel.setFixedHeight(40)
+        btn_cancel.setFixedHeight(44)
         btn_cancel.setFocusPolicy(QtCore.Qt.NoFocus)
         btn_cancel.setStyleSheet(
             f"QPushButton {{ background: {COL_BG_DARK}; color: {COL_TEXT_DIM}; "
@@ -1247,7 +1301,7 @@ class MainWindow(QtWidgets.QMainWindow):
             f"QPushButton:pressed {{ background: #2A2C32; color: {COL_TEXT}; }}"
         )
         btn_cancel.clicked.connect(dlg.reject)
-        v.addWidget(btn_cancel)
+        root.addWidget(btn_cancel)
 
         def on_saved(new_dc):
             self.hauptablauf.config.drucker_setzen(new_dc)
@@ -1262,6 +1316,128 @@ class MainWindow(QtWidgets.QMainWindow):
         editor.saved.connect(on_saved)
         editor.deleted.connect(on_deleted)
         dlg.exec_()
+
+    def _make_sonder_kachel(self, name: str, label: str) -> QtWidgets.QFrame:
+        pos = self.hauptablauf.config.position(name)
+        card = QtWidgets.QFrame()
+        card.setCursor(QtCore.Qt.PointingHandCursor)
+        card.setFixedWidth(220)
+        card.setStyleSheet(f"QFrame {{ background: {COL_BG_CARD}; "
+                           f"border: 1px solid {COL_BORDER}; border-radius: 10px; }}")
+        v = QtWidgets.QVBoxLayout(card)
+        v.setContentsMargins(12, 10, 12, 10); v.setSpacing(4)
+
+        top = QtWidgets.QHBoxLayout()
+        lbl = QtWidgets.QLabel(label)
+        lbl.setStyleSheet(f"color: {COL_TEXT}; font-size: 14px; font-weight: 600;")
+        top.addWidget(lbl, stretch=1)
+        badge = QtWidgets.QLabel(name.upper())
+        badge.setStyleSheet(f"background: {COL_INFO}; color: white; border-radius: 4px; "
+                            "padding: 2px 7px; font-size: 10px; font-weight: 600;")
+        top.addWidget(badge)
+        v.addLayout(top)
+
+        if pos:
+            v.addWidget(self._dim_lbl(f"X: {pos.x} mm  ·  Z: {pos.z} mm"))
+            v.addWidget(self._dim_lbl(f"Greifer: {pos.gripper_depth} mm  ·  Offset: {pos.lift_offset} mm"))
+        else:
+            v.addWidget(self._dim_lbl("— nicht konfiguriert —"))
+
+        hint = QtWidgets.QLabel("✎ antippen zum Bearbeiten")
+        hint.setStyleSheet(f"color: {COL_TEXT_MUTED}; font-size: 10px;")
+        v.addWidget(hint)
+
+        card.mousePressEvent = lambda ev, n=name, l=label: (
+            self._open_position_editor(n, l)
+            if ev.button() == QtCore.Qt.LeftButton else None)
+        return card
+
+    def _dim_lbl(self, text: str) -> QtWidgets.QLabel:
+        l = QtWidgets.QLabel(text)
+        l.setStyleSheet(f"color: {COL_TEXT_MUTED}; font-size: 11px;")
+        return l
+
+    def _open_position_editor(self, name: str, label: str):
+        pos = self.hauptablauf.config.position(name) or Position(x=0, z=0)
+        mw = self.geometry()
+
+        dlg = QtWidgets.QDialog(self)
+        dlg.setWindowTitle(label)
+        dlg.setModal(True)
+        dlg.setFixedSize(mw.width(), mw.height())
+        dlg.move(mw.x(), mw.y())
+        dlg.setStyleSheet(STYLESHEET + """
+            QSpinBox { min-height: 38px; font-size: 13px; }
+            QSpinBox::up-button, QSpinBox::down-button { width: 34px; }
+        """)
+
+        root = QtWidgets.QVBoxLayout(dlg)
+        root.setContentsMargins(0, 0, 0, 0); root.setSpacing(0)
+
+        inner = QtWidgets.QWidget()
+        v = QtWidgets.QVBoxLayout(inner)
+        v.setContentsMargins(20, 18, 20, 18); v.setSpacing(10)
+
+        title = QtWidgets.QLabel(f"{label} — Position bearbeiten")
+        title.setStyleSheet(f"color: {COL_TEXT}; font-size: 15px; font-weight: 600;")
+        v.addWidget(title)
+
+        f_x  = self._make_spinbox(0, 5000, pos.x,           "mm")
+        f_z  = self._make_spinbox(0, 2000, pos.z,            "mm")
+        f_gd = self._make_spinbox(0,  500, pos.gripper_depth,"mm")
+        f_lo = self._make_spinbox(0,  100, pos.lift_offset,  "mm")
+
+        grid = QtWidgets.QVBoxLayout(); grid.setSpacing(8)
+        grid.addLayout(self._pos_row(("X-Position", f_x), ("Z-Position", f_z)))
+        grid.addLayout(self._pos_row(("Greifer-Tiefe", f_gd), ("Hub-Offset", f_lo)))
+        v.addLayout(grid)
+
+        btn_row = QtWidgets.QHBoxLayout(); btn_row.setSpacing(10)
+        bs = QtWidgets.QPushButton("Speichern")
+        bs.setObjectName("primary"); bs.setMinimumHeight(44)
+        v.addLayout(btn_row)
+        btn_row.addWidget(bs)
+        v.addStretch()
+        root.addWidget(inner, stretch=1)
+
+        sep = QtWidgets.QFrame(); sep.setFixedHeight(1)
+        sep.setStyleSheet(f"background: {COL_BORDER};")
+        root.addWidget(sep)
+
+        btn_cancel = QtWidgets.QPushButton("✕  Abbrechen")
+        btn_cancel.setFixedHeight(44); btn_cancel.setFocusPolicy(QtCore.Qt.NoFocus)
+        btn_cancel.setStyleSheet(
+            f"QPushButton {{ background: {COL_BG_DARK}; color: {COL_TEXT_DIM}; "
+            "border: none; border-radius: 0; font-size: 13px; }}"
+            f"QPushButton:pressed {{ background: #2A2C32; color: {COL_TEXT}; }}")
+        btn_cancel.clicked.connect(dlg.reject)
+        root.addWidget(btn_cancel)
+
+        def on_save():
+            self.hauptablauf.config.position_setzen(
+                name, Position(x=f_x.value(), z=f_z.value(),
+                               gripper_depth=f_gd.value(), lift_offset=f_lo.value()))
+            self._toast("Gespeichert", label)
+            dlg.accept()
+
+        bs.clicked.connect(on_save)
+        dlg.exec_()
+
+    def _make_spinbox(self, lo, hi, val, suffix) -> QtWidgets.QSpinBox:
+        s = QtWidgets.QSpinBox()
+        s.setRange(lo, hi); s.setValue(val); s.setSuffix(f" {suffix}")
+        return s
+
+    def _pos_row(self, *pairs) -> QtWidgets.QHBoxLayout:
+        row = QtWidgets.QHBoxLayout(); row.setSpacing(12)
+        for label, widget in pairs:
+            lbl = QtWidgets.QLabel(label)
+            lbl.setStyleSheet(f"color: {COL_TEXT_DIM}; font-size: 12px;")
+            lbl.setFixedWidth(90)
+            pair = QtWidgets.QHBoxLayout(); pair.setSpacing(6)
+            pair.addWidget(lbl); pair.addWidget(widget)
+            row.addLayout(pair)
+        return row
 
     def _on_config_changed(self):
         self._rebuild_drucker_kacheln()

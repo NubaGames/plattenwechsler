@@ -105,6 +105,15 @@ class Config:
             i += 1
         return i
 
+    def position_setzen(self, name: str, pos: "Position") -> None:
+        with self._lock:
+            self._data.setdefault("positionen", {})[name] = {
+                "x": pos.x, "z": pos.z,
+                "gripper_depth": pos.gripper_depth,
+                "lift_offset": pos.lift_offset,
+            }
+            self._save()
+
     # ---------- GPIO ----------
     def gpio_drucker_fertig(self) -> Dict[int, int]:
         return {d.id: d.pin_fertig
