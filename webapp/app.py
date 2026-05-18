@@ -24,9 +24,9 @@ logging.basicConfig(level=logging.INFO,
 logger = logging.getLogger("webapp")
 
 
-MQTT_HOST = "localhost"
+MQTT_HOST = "broker.hivemq.com"
 MQTT_PORT = 1883
-BASE_TOPIC = "plattenwechsler"
+BASE_TOPIC = "plattenwechsler-g6twie23a"
 WEB_PORT = 5000
 
 

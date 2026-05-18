@@ -73,12 +73,12 @@ positionen:
     lift_offset: 8
 mqtt:
   enabled: true
-  broker_host: localhost
+  broker_host: broker.hivemq.com
   broker_port: 1883
   username: ''
   password: ''
   client_id: plattenwechsler-pi
-  base_topic: plattenwechsler
+  base_topic: plattenwechsler-g6twie23a
   qos: 1
   retain_status: true
   reconnect_intervall_s: 5.0
