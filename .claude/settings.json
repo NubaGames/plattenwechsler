@@ -47,7 +47,8 @@
       "Bash(mosquitto_sub -h broker.hivemq.com -p 1883 -t \"test/plattenwechsler\" -C 1 -W 3)",
       "Bash(mosquitto_sub -h broker.hivemq.com -p 1883 -t \"plattenwechsler-g6twie23a/#\" -C 1 -W 6)",
       "Bash(mosquitto_pub -h broker.hivemq.com -p 1883 -t \"plattenwechsler-g6twie23a/test\" -m \"online\")",
-      "Bash(python3 -c \"import sys; sys.path.insert\\(0, '/home/nura/plattenwechsler'\\); from plattenwechsler.ui.main_window import *\")"
+      "Bash(python3 -c \"import sys; sys.path.insert\\(0, '/home/nura/plattenwechsler'\\); from plattenwechsler.ui.main_window import *\")",
+      "Bash(python3 -c \"import ast; ast.parse\\(open\\('/home/nura/plattenwechsler/plattenwechsler/ui/main_window.py'\\).read\\(\\)\\); print\\('OK'\\)\")"
     ],
     "additionalDirectories": [
       "/home/nura/Desktop",

@@ -68,13 +68,6 @@ ablagen:
   gripper_depth: 120
   lift_offset: 8
   belegt: false
-- id: 2
-  name: Ablage 2
-  x: 0
-  z: 0
-  gripper_depth: 120
-  lift_offset: 8
-  belegt: false
 magazine:
 - id: 1
   name: Magazin 1

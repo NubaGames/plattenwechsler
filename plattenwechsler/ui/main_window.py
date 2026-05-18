@@ -266,7 +266,7 @@ class DruckerEditor(QtWidgets.QFrame):
 
         # Name + Pin Fertig ganz oben
         self.f_name = QtWidgets.QLineEdit(dc.name)
-        self.f_pin  = self._spin(0, 40, dc.pin_fertig, "BCM")
+        self.f_pin  = self._spin(0, 40, dc.pin_fertig, "")
         top = QtWidgets.QHBoxLayout(); top.setSpacing(8)
         lbl_n = QtWidgets.QLabel("Name")
         lbl_n.setStyleSheet(f"color: {COL_TEXT_DIM}; font-size: 12px;")
@@ -621,11 +621,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self._kacheln: dict = {}
         self._drucker_kacheln: dict = {}
         self._service_drucker_btns: list = []
+        self._service_lager_btns: list = []
         self._service_busy = False
         self._switch("status")
         self._rebuild_drucker_kacheln()
         self._rebuild_kacheln()
         self._rebuild_service_drucker_btns()
+        self._rebuild_service_lager_btns()
         self._lager_switch(0)
         self._rebuild_ablage_kacheln()
         self._rebuild_magazin_kacheln()
@@ -885,19 +887,19 @@ class MainWindow(QtWidgets.QMainWindow):
         _flay.setContentsMargins(0, 0, 0, 0); _flay.setSpacing(8)
         v.addWidget(self.fahre_drucker_w)
 
-        # Schlitten zu Sonderpositionen
-        v.addWidget(self._section_lbl("WEITERE POSITIONEN"))
-        sp_row = QtWidgets.QGridLayout(); sp_row.setSpacing(8)
-        for i, (label, key) in enumerate([
-            ("Home", "home"), ("Ablage", "ablage"), ("Magazin", "magazin")
-        ]):
-            btn = QtWidgets.QPushButton(label); btn.setMinimumHeight(40)
-            btn.clicked.connect(lambda _, k=key, n=label: self._on_service_pos(k, n))
-            sp_row.addWidget(btn, 0, i)
-            sp_row.setColumnStretch(i, 1)
-            setattr(self, f"btn_pos_{key}", btn)
-        sp_w = QtWidgets.QWidget(); sp_w.setLayout(sp_row)
-        v.addWidget(sp_w)
+        v.addWidget(self._section_lbl("ABLAGEN"))
+        self.fahre_ablage_w = QtWidgets.QWidget()
+        self.fahre_ablage_w.setLayout(QtWidgets.QVBoxLayout())
+        self.fahre_ablage_w.layout().setContentsMargins(0, 0, 0, 0)
+        self.fahre_ablage_w.layout().setSpacing(8)
+        v.addWidget(self.fahre_ablage_w)
+
+        v.addWidget(self._section_lbl("MAGAZINE"))
+        self.fahre_magazin_w = QtWidgets.QWidget()
+        self.fahre_magazin_w.setLayout(QtWidgets.QVBoxLayout())
+        self.fahre_magazin_w.layout().setContentsMargins(0, 0, 0, 0)
+        self.fahre_magazin_w.layout().setSpacing(8)
+        v.addWidget(self.fahre_magazin_w)
 
         # Referenzfahrt
         v.addWidget(self._section_lbl("REFERENZFAHRT"))
@@ -1453,12 +1455,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 f"border: 1px solid {COL_DHBW_RED}; border-radius: 8px; "
                 "padding: 10px 14px; font-size: 12px;")
 
-        # Sonderpositionen
-        for key in ("home", "ablage", "magazin"):
-            btn = getattr(self, f"btn_pos_{key}")
+        # Lager + Drucker-Buttons
+        for btn in self._service_lager_btns:
             btn.setEnabled(service_active)
-
-        # Drucker-Buttons — nur enabled-Zustand aktualisieren
         for btn in self._service_drucker_btns:
             btn.setEnabled(service_active)
 
@@ -1527,6 +1526,45 @@ class MainWindow(QtWidgets.QMainWindow):
         for col in range(4):
             grid.setColumnStretch(col, 1)
         lay.addWidget(grid_w)
+
+    def _rebuild_service_lager_btns(self):
+        self._service_lager_btns.clear()
+
+        def _fill(container_w, items, name_fn, click_fn, leer_text):
+            lay = container_w.layout()
+            while lay.count():
+                item = lay.takeAt(0)
+                if item.widget(): item.widget().deleteLater()
+            if not items:
+                l = QtWidgets.QLabel(leer_text)
+                l.setStyleSheet(f"color: {COL_TEXT_MUTED};")
+                l.setAlignment(QtCore.Qt.AlignCenter)
+                lay.addWidget(l)
+                return
+            grid_w = QtWidgets.QWidget()
+            grid = QtWidgets.QGridLayout(grid_w)
+            grid.setContentsMargins(0, 0, 0, 0); grid.setSpacing(8)
+            for i, item in enumerate(items):
+                btn = QtWidgets.QPushButton(name_fn(item))
+                btn.setMinimumHeight(40)
+                btn.clicked.connect(lambda _, fn=click_fn, it=item: fn(it))
+                grid.addWidget(btn, i // 4, i % 4)
+                self._service_lager_btns.append(btn)
+            for col in range(4):
+                grid.setColumnStretch(col, 1)
+            lay.addWidget(grid_w)
+
+        _fill(self.fahre_ablage_w,
+              self.hauptablauf.config.ablage_liste(),
+              lambda ac: ac.name or f"Ablage {ac.id}",
+              lambda ac: self.hauptablauf.service_fahre_zu_ablage(ac.id),
+              "— keine Ablage konfiguriert —")
+
+        _fill(self.fahre_magazin_w,
+              self.hauptablauf.config.magazin_liste(),
+              lambda mc: mc.name or f"Magazin {mc.id}",
+              lambda mc: self.hauptablauf.service_fahre_zu_magazin(mc.id),
+              "— kein Magazin konfiguriert —")
 
     # ============================================================
     # Drucker-Kacheln (Drucker-Tab)
@@ -1602,6 +1640,16 @@ class MainWindow(QtWidgets.QMainWindow):
         root.addWidget(btn_cancel)
 
         def on_saved(new_dc):
+            if new_dc.pin_fertig > 0:
+                konflikt = next(
+                    (d for d in self.hauptablauf.config.drucker_liste()
+                     if d.id != new_dc.id and d.pin_fertig == new_dc.pin_fertig),
+                    None)
+                if konflikt:
+                    QtWidgets.QMessageBox.warning(
+                        dlg, "Pin bereits belegt",
+                        f"GPIO {new_dc.pin_fertig} wird bereits von\n{konflikt.name} verwendet.")
+                    return
             self.hauptablauf.config.drucker_setzen(new_dc)
             self._toast("Gespeichert", f"Drucker {new_dc.id}")
             dlg.accept()
@@ -1640,6 +1688,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self._rebuild_drucker_kacheln()
         self._rebuild_kacheln()
         self._rebuild_service_drucker_btns()
+        self._rebuild_service_lager_btns()
         self._rebuild_ablage_kacheln()
         self._rebuild_magazin_kacheln()
         self._refresh()
@@ -1677,11 +1726,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self._run_service_cmd(
             lambda: self.hauptablauf.service_fahre_zu_drucker(did),
             f"→ Drucker {did}")
-
-    def _on_service_pos(self, ziel: str, label: str):
-        self._run_service_cmd(
-            lambda: self.hauptablauf.service_fahre_zu_position(ziel),
-            f"→ {label}")
 
     def _run_service_cmd(self, fn, ok_label: str):
         if self._service_busy:

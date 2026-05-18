@@ -289,36 +289,28 @@ class Hauptablauf:
                 esp_code=e.esp_code)
             return False
 
-    def service_fahre_zu_position(self, ziel_name: str) -> bool:
+    def service_fahre_zu_ablage(self, ablage_id: int) -> bool:
         if self.state != SystemState.SERVICE: return False
-        if ziel_name == "home":
-            try:
-                self.esp.move_home(timeout_s=self._home_timeout_s)
-                return True
-            except PlattenwechslerError as e:
-                self.fehler.melde(e.klasse, f"Service: MOVE_HOME: {e.nachricht}",
-                                   esp_code=e.esp_code)
-                return False
-        if ziel_name == "ablage":
-            slots = self.config.ablage_liste()
-            if not slots: return False
-            s = slots[0]
-            x, z = s.x, s.z
-        elif ziel_name == "magazin":
-            slots = self.config.magazin_liste()
-            if not slots: return False
-            s = slots[0]
-            x, z = s.x, s.z
-        else:
-            pos = self.config.position(ziel_name)
-            if pos is None: return False
-            x, z = pos.x, pos.z
+        s = self.config.ablage(ablage_id)
+        if s is None: return False
         try:
-            self.esp.move_to(x, z, timeout_s=self._move_timeout_s)
+            self.esp.move_to(s.x, s.z, timeout_s=self._move_timeout_s)
             return True
         except PlattenwechslerError as e:
-            self.fehler.melde(e.klasse, f"Service: Fahrt zu {ziel_name}: {e.nachricht}",
-                               esp_code=e.esp_code)
+            self.fehler.melde(e.klasse,
+                f"Service: Fahrt zu Ablage {ablage_id}: {e.nachricht}", esp_code=e.esp_code)
+            return False
+
+    def service_fahre_zu_magazin(self, magazin_id: int) -> bool:
+        if self.state != SystemState.SERVICE: return False
+        s = self.config.magazin(magazin_id)
+        if s is None: return False
+        try:
+            self.esp.move_to(s.x, s.z, timeout_s=self._move_timeout_s)
+            return True
+        except PlattenwechslerError as e:
+            self.fehler.melde(e.klasse,
+                f"Service: Fahrt zu Magazin {magazin_id}: {e.nachricht}", esp_code=e.esp_code)
             return False
 
     # ============================================================
