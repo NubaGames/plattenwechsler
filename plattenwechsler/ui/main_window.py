@@ -18,9 +18,10 @@ from typing import Optional
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ..core.hauptablauf import Hauptablauf
-from ..config import Position
+
 from ..types import (
     SystemState, AuftragQuelle, DruckerStatus, DruckerConfig,
+    AblageConfig, MagazinConfig,
 )
 
 logger = logging.getLogger(__name__)
@@ -570,9 +571,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.page_manuell = self._wrap_scroll(self._build_manuell())
         self.page_service = self._wrap_scroll(self._build_service())
         self.page_drucker = self._wrap_scroll(self._build_drucker())
+        self.page_lager   = self._wrap_scroll(self._build_lager())
         self.page_fehler  = self._wrap_scroll(self._build_fehler())
         for p in (self.page_status, self.page_manuell, self.page_service,
-                  self.page_drucker, self.page_fehler):
+                  self.page_drucker, self.page_lager, self.page_fehler):
             self.stack.addWidget(p)
         body.addWidget(self.stack, stretch=1)
 
@@ -624,6 +626,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self._rebuild_drucker_kacheln()
         self._rebuild_kacheln()
         self._rebuild_service_drucker_btns()
+        self._lager_switch(0)
+        self._rebuild_ablage_kacheln()
+        self._rebuild_magazin_kacheln()
         self._refresh()
 
     def _wrap_scroll(self, content: QtWidgets.QWidget) -> QtWidgets.QScrollArea:
@@ -720,16 +725,18 @@ class MainWindow(QtWidgets.QMainWindow):
         self.btn_manuell = SidebarButton("Manuell")
         self.btn_service = SidebarButton("Service")
         self.btn_drucker = SidebarButton("Drucker")
+        self.btn_lager   = SidebarButton("Lager")
         self.btn_fehler  = SidebarButton("Fehler")
 
         self.btn_status.clicked.connect(lambda: self._switch("status"))
         self.btn_manuell.clicked.connect(lambda: self._switch("manuell"))
         self.btn_service.clicked.connect(lambda: self._switch("service"))
         self.btn_drucker.clicked.connect(lambda: self._switch("drucker"))
+        self.btn_lager.clicked.connect(lambda: self._switch("lager"))
         self.btn_fehler.clicked.connect(lambda: self._switch("fehler"))
 
         for b in (self.btn_status, self.btn_manuell, self.btn_service,
-                  self.btn_drucker, self.btn_fehler):
+                  self.btn_drucker, self.btn_lager, self.btn_fehler):
             lay.addWidget(b)
         lay.addStretch()
 
@@ -753,6 +760,7 @@ class MainWindow(QtWidgets.QMainWindow):
             "manuell": (self.btn_manuell, self.page_manuell),
             "service": (self.btn_service, self.page_service),
             "drucker": (self.btn_drucker, self.page_drucker),
+            "lager":   (self.btn_lager,   self.page_lager),
             "fehler":  (self.btn_fehler,  self.page_fehler),
         }
         for n, (btn, _) in m.items():
@@ -928,18 +936,308 @@ class MainWindow(QtWidgets.QMainWindow):
         self.drucker_kacheln_grid.setSpacing(12)
         self.drucker_kacheln_grid.setAlignment(QtCore.Qt.AlignTop)
         v.addWidget(self.drucker_kacheln_w, stretch=1)
-
-        v.addWidget(self._section_lbl("SONDERPOSITIONEN"))
-        sonder_row = QtWidgets.QHBoxLayout(); sonder_row.setSpacing(12)
-        for name, label in [("ablage", "Ablage"), ("magazin", "Magazin")]:
-            card = self._make_sonder_kachel(name, label)
-            sonder_row.addWidget(card)
-        sonder_row.addStretch()
-        sonder_w = QtWidgets.QWidget(); sonder_w.setLayout(sonder_row)
-        v.addWidget(sonder_w)
-
         v.addStretch()
         return page
+
+    # ============================================================
+    # Lager-Seite (Ablagen + Magazin)
+    # ============================================================
+    def _build_lager(self) -> QtWidgets.QWidget:
+        page = QtWidgets.QWidget()
+        v = QtWidgets.QVBoxLayout(page)
+        v.setContentsMargins(20, 18, 20, 20); v.setSpacing(10)
+
+        title = QtWidgets.QLabel("Lager-Konfiguration")
+        title.setStyleSheet(f"color: {COL_TEXT}; font-size: 20px; font-weight: 600;")
+        v.addWidget(title)
+
+        # Tab-Leiste
+        tab_row = QtWidgets.QHBoxLayout(); tab_row.setSpacing(0)
+        self._lager_tab_btns: list = []
+        for i, lbl in enumerate(["Ablagen", "Magazin"]):
+            btn = QtWidgets.QPushButton(lbl)
+            btn.setFixedHeight(36); btn.setFocusPolicy(QtCore.Qt.NoFocus)
+            btn.clicked.connect(lambda _, idx=i: self._lager_switch(idx))
+            tab_row.addWidget(btn)
+            self._lager_tab_btns.append(btn)
+        v.addLayout(tab_row)
+
+        self._lager_stack = QtWidgets.QStackedWidget()
+
+        # Seite 0: Ablagen
+        p_ablage = QtWidgets.QWidget()
+        pv = QtWidgets.QVBoxLayout(p_ablage)
+        pv.setContentsMargins(0, 8, 0, 0); pv.setSpacing(8)
+        btn_add_a = QtWidgets.QPushButton("➕  Neue Ablage hinzufügen")
+        btn_add_a.setObjectName("primary"); btn_add_a.setMinimumHeight(40)
+        btn_add_a.clicked.connect(self._on_ablage_add)
+        pv.addWidget(btn_add_a)
+        self._ablage_grid_w = QtWidgets.QWidget()
+        self._ablage_grid = QtWidgets.QGridLayout(self._ablage_grid_w)
+        self._ablage_grid.setSpacing(10)
+        self._ablage_grid.setAlignment(QtCore.Qt.AlignTop)
+        pv.addWidget(self._ablage_grid_w, stretch=1)
+        self._lager_stack.addWidget(p_ablage)
+
+        # Seite 1: Magazin
+        p_magazin = QtWidgets.QWidget()
+        mv = QtWidgets.QVBoxLayout(p_magazin)
+        mv.setContentsMargins(0, 8, 0, 0); mv.setSpacing(8)
+        btn_add_m = QtWidgets.QPushButton("➕  Neues Magazin hinzufügen")
+        btn_add_m.setObjectName("primary"); btn_add_m.setMinimumHeight(40)
+        btn_add_m.clicked.connect(self._on_magazin_add)
+        mv.addWidget(btn_add_m)
+        self._magazin_grid_w = QtWidgets.QWidget()
+        self._magazin_grid = QtWidgets.QGridLayout(self._magazin_grid_w)
+        self._magazin_grid.setSpacing(10)
+        self._magazin_grid.setAlignment(QtCore.Qt.AlignTop)
+        mv.addWidget(self._magazin_grid_w, stretch=1)
+        self._lager_stack.addWidget(p_magazin)
+
+        v.addWidget(self._lager_stack, stretch=1)
+        return page
+
+    def _lager_switch(self, idx: int):
+        self._lager_stack.setCurrentIndex(idx)
+        for i, btn in enumerate(self._lager_tab_btns):
+            if i == idx:
+                btn.setStyleSheet(
+                    f"QPushButton {{ background: {COL_DHBW_RED}; color: white; "
+                    "border: none; border-radius: 0; font-size: 13px; font-weight: 600; }}")
+            else:
+                btn.setStyleSheet(
+                    f"QPushButton {{ background: {COL_BG_SUNK}; color: {COL_TEXT_DIM}; "
+                    f"border: none; border-bottom: 1px solid {COL_BORDER}; "
+                    "border-radius: 0; font-size: 13px; }}"
+                    f"QPushButton:pressed {{ background: {COL_BG_CARD}; }}")
+
+    def _rebuild_ablage_kacheln(self):
+        while self._ablage_grid.count():
+            item = self._ablage_grid.takeAt(0)
+            if item.widget(): item.widget().deleteLater()
+
+        ablagen = self.hauptablauf.config.ablage_liste()
+        if not ablagen:
+            l = QtWidgets.QLabel("Noch keine Ablage konfiguriert.\nOben '+' drücken.")
+            l.setAlignment(QtCore.Qt.AlignCenter)
+            l.setStyleSheet(f"color: {COL_TEXT_MUTED}; padding: 20px;")
+            self._ablage_grid.addWidget(l, 0, 0)
+            return
+        for idx, ac in enumerate(ablagen):
+            self._ablage_grid.addWidget(self._make_ablage_kachel(ac), idx // 3, idx % 3)
+        for col in range(3):
+            self._ablage_grid.setColumnStretch(col, 1)
+
+    def _make_ablage_kachel(self, ac: AblageConfig) -> QtWidgets.QFrame:
+        card = QtWidgets.QFrame()
+        card.setObjectName("card")
+        v = QtWidgets.QVBoxLayout(card)
+        v.setContentsMargins(12, 10, 12, 10); v.setSpacing(6)
+
+        top = QtWidgets.QHBoxLayout()
+        name_lbl = QtWidgets.QLabel(ac.name or f"Ablage {ac.id}")
+        name_lbl.setStyleSheet(f"color: {COL_TEXT}; font-size: 13px; font-weight: 600;")
+        top.addWidget(name_lbl, stretch=1)
+        badge_txt = "BELEGT" if ac.belegt else "FREI"
+        badge_col = COL_DHBW_RED if ac.belegt else COL_OK
+        badge = QtWidgets.QLabel(badge_txt)
+        badge.setStyleSheet(f"background: {badge_col}; color: white; border-radius: 4px; "
+                            "padding: 2px 6px; font-size: 9px; font-weight: 700;")
+        top.addWidget(badge)
+        v.addLayout(top)
+
+        v.addWidget(self._dim_lbl(f"X: {ac.x} mm  ·  Z: {ac.z} mm"))
+        v.addWidget(self._dim_lbl(f"Greifer: {ac.gripper_depth} mm  ·  Offset: {ac.lift_offset} mm"))
+
+        btn_toggle = QtWidgets.QPushButton(
+            "Als frei markieren" if ac.belegt else "Als belegt markieren")
+        btn_toggle.setMinimumHeight(34)
+        btn_toggle.setObjectName("danger" if ac.belegt else "success")
+        btn_toggle.clicked.connect(
+            lambda _, aid=ac.id, b=ac.belegt: self._on_ablage_toggle(aid, b))
+        v.addWidget(btn_toggle)
+
+        btn_edit = QtWidgets.QPushButton("✎ Position bearbeiten")
+        btn_edit.setMinimumHeight(30)
+        btn_edit.setStyleSheet(f"font-size: 11px; color: {COL_TEXT_DIM};")
+        btn_edit.clicked.connect(lambda _, a=ac: self._open_lager_editor(a, "ablage"))
+        v.addWidget(btn_edit)
+        return card
+
+    def _rebuild_magazin_kacheln(self):
+        while self._magazin_grid.count():
+            item = self._magazin_grid.takeAt(0)
+            if item.widget(): item.widget().deleteLater()
+
+        magazine = self.hauptablauf.config.magazin_liste()
+        if not magazine:
+            l = QtWidgets.QLabel("Noch kein Magazin konfiguriert.\nOben '+' drücken.")
+            l.setAlignment(QtCore.Qt.AlignCenter)
+            l.setStyleSheet(f"color: {COL_TEXT_MUTED}; padding: 20px;")
+            self._magazin_grid.addWidget(l, 0, 0)
+            return
+        for idx, mc in enumerate(magazine):
+            self._magazin_grid.addWidget(self._make_magazin_kachel(mc), idx // 3, idx % 3)
+        for col in range(3):
+            self._magazin_grid.setColumnStretch(col, 1)
+
+    def _make_magazin_kachel(self, mc: MagazinConfig) -> QtWidgets.QFrame:
+        card = QtWidgets.QFrame()
+        card.setObjectName("card")
+        v = QtWidgets.QVBoxLayout(card)
+        v.setContentsMargins(12, 10, 12, 10); v.setSpacing(6)
+
+        top = QtWidgets.QHBoxLayout()
+        name_lbl = QtWidgets.QLabel(mc.name or f"Magazin {mc.id}")
+        name_lbl.setStyleSheet(f"color: {COL_TEXT}; font-size: 13px; font-weight: 600;")
+        top.addWidget(name_lbl, stretch=1)
+        badge_txt = "VERFÜGBAR" if mc.verfuegbar else "LEER"
+        badge_col = COL_OK if mc.verfuegbar else COL_TEXT_MUTED
+        badge = QtWidgets.QLabel(badge_txt)
+        badge.setStyleSheet(f"background: {badge_col}; color: white; border-radius: 4px; "
+                            "padding: 2px 6px; font-size: 9px; font-weight: 700;")
+        top.addWidget(badge)
+        v.addLayout(top)
+
+        v.addWidget(self._dim_lbl(f"X: {mc.x} mm  ·  Z: {mc.z} mm"))
+        v.addWidget(self._dim_lbl(f"Greifer: {mc.gripper_depth} mm  ·  Offset: {mc.lift_offset} mm"))
+
+        btn_toggle = QtWidgets.QPushButton(
+            "Als leer markieren" if mc.verfuegbar else "Als verfügbar markieren")
+        btn_toggle.setMinimumHeight(34)
+        btn_toggle.setObjectName("danger" if mc.verfuegbar else "success")
+        btn_toggle.clicked.connect(
+            lambda _, mid=mc.id, v=mc.verfuegbar: self._on_magazin_toggle(mid, v))
+        v.addWidget(btn_toggle)
+
+        btn_edit = QtWidgets.QPushButton("✎ Position bearbeiten")
+        btn_edit.setMinimumHeight(30)
+        btn_edit.setStyleSheet(f"font-size: 11px; color: {COL_TEXT_DIM};")
+        btn_edit.clicked.connect(lambda _, m=mc: self._open_lager_editor(m, "magazin"))
+        v.addWidget(btn_edit)
+        return card
+
+    def _open_lager_editor(self, cfg, typ: str):
+        mw = self.geometry()
+        dlg = QtWidgets.QDialog(self)
+        dlg.setWindowTitle(cfg.name or f"{typ.capitalize()} {cfg.id}")
+        dlg.setModal(True)
+        dlg.setFixedSize(mw.width(), mw.height())
+        dlg.move(mw.x(), mw.y())
+        dlg.setStyleSheet(STYLESHEET + """
+            QSpinBox, QLineEdit { min-height: 38px; font-size: 13px; }
+            QSpinBox::up-button, QSpinBox::down-button { width: 34px; }
+        """)
+
+        root = QtWidgets.QVBoxLayout(dlg)
+        root.setContentsMargins(0, 0, 0, 0); root.setSpacing(0)
+
+        inner = QtWidgets.QWidget()
+        v = QtWidgets.QVBoxLayout(inner)
+        v.setContentsMargins(20, 18, 20, 18); v.setSpacing(10)
+
+        title = QtWidgets.QLabel(f"{cfg.name or typ.capitalize()} — Position bearbeiten")
+        title.setStyleSheet(f"color: {COL_TEXT}; font-size: 15px; font-weight: 600;")
+        v.addWidget(title)
+
+        f_name = QtWidgets.QLineEdit(cfg.name)
+        f_x    = self._make_spinbox(0, 5000, cfg.x,             "mm")
+        f_z    = self._make_spinbox(0, 2000, cfg.z,             "mm")
+        f_gd   = self._make_spinbox(0,  500, cfg.gripper_depth, "mm")
+        f_lo   = self._make_spinbox(0,  100, cfg.lift_offset,   "mm")
+
+        v.addLayout(self._field_row_plain("Name", f_name))
+        v.addLayout(self._pos_row(("X-Position", f_x), ("Z-Position", f_z)))
+        v.addLayout(self._pos_row(("Greifer-Tiefe", f_gd), ("Hub-Offset", f_lo)))
+
+        btn_row = QtWidgets.QHBoxLayout(); btn_row.setSpacing(10)
+        bs = QtWidgets.QPushButton("Speichern")
+        bs.setObjectName("primary"); bs.setMinimumHeight(44)
+        bd = QtWidgets.QPushButton(f"{typ.capitalize()} entfernen")
+        bd.setObjectName("danger"); bd.setMinimumHeight(44)
+        btn_row.addWidget(bs); btn_row.addWidget(bd)
+        v.addLayout(btn_row)
+        v.addStretch()
+        root.addWidget(inner, stretch=1)
+
+        sep = QtWidgets.QFrame(); sep.setFixedHeight(1)
+        sep.setStyleSheet(f"background: {COL_BORDER};")
+        root.addWidget(sep)
+
+        kbd = OnScreenKeyboard()
+        root.addWidget(kbd)
+
+        sep2 = QtWidgets.QFrame(); sep2.setFixedHeight(1)
+        sep2.setStyleSheet(f"background: {COL_BORDER};")
+        root.addWidget(sep2)
+
+        btn_cancel = QtWidgets.QPushButton("✕  Abbrechen")
+        btn_cancel.setFixedHeight(44); btn_cancel.setFocusPolicy(QtCore.Qt.NoFocus)
+        btn_cancel.setStyleSheet(
+            f"QPushButton {{ background: {COL_BG_DARK}; color: {COL_TEXT_DIM}; "
+            "border: none; border-radius: 0; font-size: 13px; }}"
+            f"QPushButton:pressed {{ background: #2A2C32; color: {COL_TEXT}; }}")
+        btn_cancel.clicked.connect(dlg.reject)
+        root.addWidget(btn_cancel)
+
+        def on_save():
+            name = f_name.text().strip() or f"{typ.capitalize()} {cfg.id}"
+            if typ == "ablage":
+                self.hauptablauf.config.ablage_setzen(AblageConfig(
+                    id=cfg.id, name=name, x=f_x.value(), z=f_z.value(),
+                    gripper_depth=f_gd.value(), lift_offset=f_lo.value(),
+                    belegt=cfg.belegt))
+                self._rebuild_ablage_kacheln()
+            else:
+                self.hauptablauf.config.magazin_setzen(MagazinConfig(
+                    id=cfg.id, name=name, x=f_x.value(), z=f_z.value(),
+                    gripper_depth=f_gd.value(), lift_offset=f_lo.value(),
+                    verfuegbar=cfg.verfuegbar))
+                self._rebuild_magazin_kacheln()
+            self._toast("Gespeichert", name)
+            dlg.accept()
+
+        def on_delete():
+            if typ == "ablage":
+                self.hauptablauf.config.ablage_entfernen(cfg.id)
+                self._rebuild_ablage_kacheln()
+            else:
+                self.hauptablauf.config.magazin_entfernen(cfg.id)
+                self._rebuild_magazin_kacheln()
+            self._toast("Entfernt", cfg.name or str(cfg.id))
+            dlg.accept()
+
+        bs.clicked.connect(on_save)
+        bd.clicked.connect(on_delete)
+        dlg.exec_()
+
+    def _field_row_plain(self, label: str, widget) -> QtWidgets.QHBoxLayout:
+        row = QtWidgets.QHBoxLayout(); row.setSpacing(8)
+        lbl = QtWidgets.QLabel(label)
+        lbl.setStyleSheet(f"color: {COL_TEXT_DIM}; font-size: 12px;")
+        lbl.setFixedWidth(90)
+        row.addWidget(lbl); row.addWidget(widget)
+        return row
+
+    def _on_ablage_toggle(self, ablage_id: int, war_belegt: bool):
+        self.hauptablauf.config.ablage_belegt_setzen(ablage_id, not war_belegt)
+        self._rebuild_ablage_kacheln()
+        self._toast("Ablage " + ("freigegeben" if war_belegt else "als belegt markiert"),
+                    f"Ablage {ablage_id}")
+
+    def _on_magazin_toggle(self, magazin_id: int, war_verfuegbar: bool):
+        self.hauptablauf.config.magazin_verfuegbar_setzen(magazin_id, not war_verfuegbar)
+        self._rebuild_magazin_kacheln()
+        self._toast("Magazin " + ("als leer markiert" if war_verfuegbar else "wieder verfügbar"),
+                    f"Magazin {magazin_id}")
+
+    def _on_ablage_add(self):
+        new_id = self.hauptablauf.config.naechste_freie_ablage_id()
+        self._open_lager_editor(AblageConfig(id=new_id, name=f"Ablage {new_id}"), "ablage")
+
+    def _on_magazin_add(self):
+        new_id = self.hauptablauf.config.naechste_freie_magazin_id()
+        self._open_lager_editor(MagazinConfig(id=new_id, name=f"Magazin {new_id}"), "magazin")
 
     # ============================================================
     # Fehler-Seite
@@ -1317,111 +1615,10 @@ class MainWindow(QtWidgets.QMainWindow):
         editor.deleted.connect(on_deleted)
         dlg.exec_()
 
-    def _make_sonder_kachel(self, name: str, label: str) -> QtWidgets.QFrame:
-        pos = self.hauptablauf.config.position(name)
-        card = QtWidgets.QFrame()
-        card.setCursor(QtCore.Qt.PointingHandCursor)
-        card.setFixedWidth(220)
-        card.setStyleSheet(f"QFrame {{ background: {COL_BG_CARD}; "
-                           f"border: 1px solid {COL_BORDER}; border-radius: 10px; }}")
-        v = QtWidgets.QVBoxLayout(card)
-        v.setContentsMargins(12, 10, 12, 10); v.setSpacing(4)
-
-        top = QtWidgets.QHBoxLayout()
-        lbl = QtWidgets.QLabel(label)
-        lbl.setStyleSheet(f"color: {COL_TEXT}; font-size: 14px; font-weight: 600;")
-        top.addWidget(lbl, stretch=1)
-        badge = QtWidgets.QLabel(name.upper())
-        badge.setStyleSheet(f"background: {COL_INFO}; color: white; border-radius: 4px; "
-                            "padding: 2px 7px; font-size: 10px; font-weight: 600;")
-        top.addWidget(badge)
-        v.addLayout(top)
-
-        if pos:
-            v.addWidget(self._dim_lbl(f"X: {pos.x} mm  ·  Z: {pos.z} mm"))
-            v.addWidget(self._dim_lbl(f"Greifer: {pos.gripper_depth} mm  ·  Offset: {pos.lift_offset} mm"))
-        else:
-            v.addWidget(self._dim_lbl("— nicht konfiguriert —"))
-
-        hint = QtWidgets.QLabel("✎ antippen zum Bearbeiten")
-        hint.setStyleSheet(f"color: {COL_TEXT_MUTED}; font-size: 10px;")
-        v.addWidget(hint)
-
-        card.mousePressEvent = lambda ev, n=name, l=label: (
-            self._open_position_editor(n, l)
-            if ev.button() == QtCore.Qt.LeftButton else None)
-        return card
-
     def _dim_lbl(self, text: str) -> QtWidgets.QLabel:
         l = QtWidgets.QLabel(text)
         l.setStyleSheet(f"color: {COL_TEXT_MUTED}; font-size: 11px;")
         return l
-
-    def _open_position_editor(self, name: str, label: str):
-        pos = self.hauptablauf.config.position(name) or Position(x=0, z=0)
-        mw = self.geometry()
-
-        dlg = QtWidgets.QDialog(self)
-        dlg.setWindowTitle(label)
-        dlg.setModal(True)
-        dlg.setFixedSize(mw.width(), mw.height())
-        dlg.move(mw.x(), mw.y())
-        dlg.setStyleSheet(STYLESHEET + """
-            QSpinBox { min-height: 38px; font-size: 13px; }
-            QSpinBox::up-button, QSpinBox::down-button { width: 34px; }
-        """)
-
-        root = QtWidgets.QVBoxLayout(dlg)
-        root.setContentsMargins(0, 0, 0, 0); root.setSpacing(0)
-
-        inner = QtWidgets.QWidget()
-        v = QtWidgets.QVBoxLayout(inner)
-        v.setContentsMargins(20, 18, 20, 18); v.setSpacing(10)
-
-        title = QtWidgets.QLabel(f"{label} — Position bearbeiten")
-        title.setStyleSheet(f"color: {COL_TEXT}; font-size: 15px; font-weight: 600;")
-        v.addWidget(title)
-
-        f_x  = self._make_spinbox(0, 5000, pos.x,           "mm")
-        f_z  = self._make_spinbox(0, 2000, pos.z,            "mm")
-        f_gd = self._make_spinbox(0,  500, pos.gripper_depth,"mm")
-        f_lo = self._make_spinbox(0,  100, pos.lift_offset,  "mm")
-
-        grid = QtWidgets.QVBoxLayout(); grid.setSpacing(8)
-        grid.addLayout(self._pos_row(("X-Position", f_x), ("Z-Position", f_z)))
-        grid.addLayout(self._pos_row(("Greifer-Tiefe", f_gd), ("Hub-Offset", f_lo)))
-        v.addLayout(grid)
-
-        btn_row = QtWidgets.QHBoxLayout(); btn_row.setSpacing(10)
-        bs = QtWidgets.QPushButton("Speichern")
-        bs.setObjectName("primary"); bs.setMinimumHeight(44)
-        v.addLayout(btn_row)
-        btn_row.addWidget(bs)
-        v.addStretch()
-        root.addWidget(inner, stretch=1)
-
-        sep = QtWidgets.QFrame(); sep.setFixedHeight(1)
-        sep.setStyleSheet(f"background: {COL_BORDER};")
-        root.addWidget(sep)
-
-        btn_cancel = QtWidgets.QPushButton("✕  Abbrechen")
-        btn_cancel.setFixedHeight(44); btn_cancel.setFocusPolicy(QtCore.Qt.NoFocus)
-        btn_cancel.setStyleSheet(
-            f"QPushButton {{ background: {COL_BG_DARK}; color: {COL_TEXT_DIM}; "
-            "border: none; border-radius: 0; font-size: 13px; }}"
-            f"QPushButton:pressed {{ background: #2A2C32; color: {COL_TEXT}; }}")
-        btn_cancel.clicked.connect(dlg.reject)
-        root.addWidget(btn_cancel)
-
-        def on_save():
-            self.hauptablauf.config.position_setzen(
-                name, Position(x=f_x.value(), z=f_z.value(),
-                               gripper_depth=f_gd.value(), lift_offset=f_lo.value()))
-            self._toast("Gespeichert", label)
-            dlg.accept()
-
-        bs.clicked.connect(on_save)
-        dlg.exec_()
 
     def _make_spinbox(self, lo, hi, val, suffix) -> QtWidgets.QSpinBox:
         s = QtWidgets.QSpinBox()
@@ -1443,6 +1640,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self._rebuild_drucker_kacheln()
         self._rebuild_kacheln()
         self._rebuild_service_drucker_btns()
+        self._rebuild_ablage_kacheln()
+        self._rebuild_magazin_kacheln()
         self._refresh()
 
     def _on_drucker_add(self):

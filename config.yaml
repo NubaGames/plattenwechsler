@@ -60,17 +60,29 @@ drucker:
   door_arm_hub_mm: 50
   gripper_depth: 120
   lift_offset: 8
-positionen:
-  ablage:
-    x: 20
-    z: 20
-    gripper_depth: 120
-    lift_offset: 8
-  magazin:
-    x: 50
-    z: 50
-    gripper_depth: 120
-    lift_offset: 8
+ablagen:
+- id: 1
+  name: Ablage 1
+  x: 20
+  z: 20
+  gripper_depth: 120
+  lift_offset: 8
+  belegt: false
+- id: 2
+  name: Ablage 2
+  x: 0
+  z: 0
+  gripper_depth: 120
+  lift_offset: 8
+  belegt: false
+magazine:
+- id: 1
+  name: Magazin 1
+  x: 50
+  z: 50
+  gripper_depth: 120
+  lift_offset: 8
+  verfuegbar: true
 mqtt:
   enabled: true
   broker_host: broker.hivemq.com

@@ -7202,3 +7202,143 @@
 2026-05-18 15:39:07 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
 2026-05-18 15:39:09 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
 2026-05-18 15:39:11 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:57:10 [INFO   ] main: === Plattenwechsler startet ===
+2026-05-18 15:57:10 [INFO   ] plattenwechsler.io_.gpio_manager: GPIO bereit (4 Drucker-Taster)
+2026-05-18 15:57:10 [INFO   ] plattenwechsler.io_.gpio_manager: Not-Aus an Pin 26 aktiv
+2026-05-18 15:57:10 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:57:10 [INFO   ] plattenwechsler.io_.mqtt_client: MQTT verbinde mit broker.hivemq.com:1883
+2026-05-18 15:57:11 [INFO   ] plattenwechsler.io_.telegram_client: Telegram-Bot @plattenwechsler_bot verbunden
+2026-05-18 15:57:11 [INFO   ] plattenwechsler.core.hauptablauf: Hauptablauf gestartet
+2026-05-18 15:57:11 [INFO   ] plattenwechsler.core.hauptablauf: Init: warte auf ESP …
+2026-05-18 15:57:12 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:57:14 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:57:16 [ERROR  ] plattenwechsler.core.fehler: Fehler: Kommunikationsfehler: ESP nicht erreichbar
+2026-05-18 15:57:16 [INFO   ] plattenwechsler.core.hauptablauf: Systemzustand: INIT → FEHLER
+2026-05-18 15:57:16 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:57:18 [INFO   ] plattenwechsler.io_.mqtt_client: MQTT verbunden
+2026-05-18 15:57:18 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:57:20 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:57:22 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:57:22 [INFO   ] plattenwechsler.config: Konfiguration gespeichert
+2026-05-18 15:57:22 [INFO   ] plattenwechsler.io_.gpio_manager: GPIO bereit (4 Drucker-Taster)
+2026-05-18 15:57:24 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:57:25 [INFO   ] plattenwechsler.config: Konfiguration gespeichert
+2026-05-18 15:57:25 [INFO   ] plattenwechsler.io_.gpio_manager: GPIO bereit (4 Drucker-Taster)
+2026-05-18 15:57:26 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:57:28 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:57:30 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:57:32 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:57:32 [INFO   ] plattenwechsler.config: Konfiguration gespeichert
+2026-05-18 15:57:33 [INFO   ] plattenwechsler.io_.gpio_manager: GPIO bereit (4 Drucker-Taster)
+2026-05-18 15:57:34 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:57:36 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:57:38 [INFO   ] plattenwechsler.config: Konfiguration gespeichert
+2026-05-18 15:57:38 [INFO   ] plattenwechsler.io_.gpio_manager: GPIO bereit (4 Drucker-Taster)
+2026-05-18 15:57:38 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:57:40 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:57:42 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:57:44 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:57:44 [INFO   ] plattenwechsler.config: Konfiguration gespeichert
+2026-05-18 15:57:45 [INFO   ] plattenwechsler.io_.gpio_manager: GPIO bereit (4 Drucker-Taster)
+2026-05-18 15:57:46 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:57:48 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:57:50 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:57:52 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:57:54 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:57:54 [INFO   ] plattenwechsler.config: Konfiguration gespeichert
+2026-05-18 15:57:55 [INFO   ] plattenwechsler.io_.gpio_manager: GPIO bereit (4 Drucker-Taster)
+2026-05-18 15:57:56 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:57:58 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:57:58 [INFO   ] plattenwechsler.config: Konfiguration gespeichert
+2026-05-18 15:57:59 [INFO   ] plattenwechsler.io_.gpio_manager: GPIO bereit (4 Drucker-Taster)
+2026-05-18 15:58:00 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:58:02 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:58:04 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:58:05 [INFO   ] plattenwechsler.config: Konfiguration gespeichert
+2026-05-18 15:58:05 [INFO   ] plattenwechsler.io_.gpio_manager: GPIO bereit (4 Drucker-Taster)
+2026-05-18 15:58:06 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:58:08 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:58:10 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:58:12 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:58:14 [INFO   ] plattenwechsler.config: Konfiguration gespeichert
+2026-05-18 15:58:14 [INFO   ] plattenwechsler.io_.gpio_manager: GPIO bereit (4 Drucker-Taster)
+2026-05-18 15:58:14 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:58:16 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:58:18 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:58:20 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:58:22 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:58:24 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:58:26 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:58:27 [INFO   ] plattenwechsler.core.fehler: Fehler quittiert
+2026-05-18 15:58:28 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:58:30 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:58:32 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:58:34 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:58:36 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:58:38 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:58:40 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:58:42 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:58:44 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:58:46 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:58:48 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:58:50 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:58:52 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:58:54 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:58:56 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:58:58 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:59:00 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:59:02 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:59:04 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:59:06 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:59:08 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:59:10 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:59:12 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:59:14 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:59:16 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:59:18 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:59:20 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:59:22 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:59:24 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:59:26 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:59:28 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:59:30 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:59:32 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:59:34 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:59:36 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:59:38 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:59:40 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:59:42 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:59:44 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:59:46 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:59:48 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:59:50 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:59:52 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:59:54 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:59:56 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 15:59:58 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 16:00:00 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 16:00:02 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 16:00:04 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 16:00:06 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 16:00:08 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 16:00:10 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 16:00:12 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 16:00:14 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 16:00:16 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 16:00:18 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 16:00:20 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 16:00:22 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 16:00:24 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 16:00:26 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 16:00:28 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 16:00:30 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 16:00:32 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 16:00:34 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 16:00:36 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 16:00:38 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 16:00:40 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 16:00:42 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 16:00:44 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 16:00:46 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 16:00:48 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-05-18 16:00:50 [ERROR  ] plattenwechsler.io_.esp_client: ESP nicht erreichbar (/dev/ttyUSB0): [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'

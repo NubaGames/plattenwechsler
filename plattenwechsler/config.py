@@ -12,7 +12,7 @@ from typing import Any, Optional, List, Dict
 
 import yaml
 
-from .types import DruckerConfig
+from .types import DruckerConfig, AblageConfig, MagazinConfig
 
 logger = logging.getLogger(__name__)
 
@@ -113,6 +113,104 @@ class Config:
                 "lift_offset": pos.lift_offset,
             }
             self._save()
+
+    # ---------- Ablagen ----------
+    def ablage_liste(self) -> list:
+        with self._lock:
+            return [AblageConfig.from_dict(d)
+                    for d in (self._data.get("ablagen") or [])]
+
+    def ablage(self, ablage_id: int) -> "Optional[AblageConfig]":
+        for a in self.ablage_liste():
+            if a.id == ablage_id:
+                return a
+        return None
+
+    def ablage_setzen(self, ac: AblageConfig) -> None:
+        with self._lock:
+            liste = self._data.setdefault("ablagen", [])
+            for i, d in enumerate(liste):
+                if int(d.get("id", 0)) == ac.id:
+                    liste[i] = ac.to_dict(); self._save(); return
+            liste.append(ac.to_dict())
+            liste.sort(key=lambda x: int(x["id"]))
+            self._save()
+
+    def ablage_entfernen(self, ablage_id: int) -> bool:
+        with self._lock:
+            liste = self._data.get("ablagen", [])
+            for i, d in enumerate(liste):
+                if int(d.get("id", 0)) == ablage_id:
+                    liste.pop(i); self._save(); return True
+        return False
+
+    def ablage_belegt_setzen(self, ablage_id: int, belegt: bool) -> None:
+        with self._lock:
+            for d in (self._data.get("ablagen") or []):
+                if int(d.get("id", 0)) == ablage_id:
+                    d["belegt"] = belegt; self._save(); return
+
+    def naechste_freie_ablage(self) -> "Optional[AblageConfig]":
+        for a in self.ablage_liste():
+            if not a.belegt:
+                return a
+        return None
+
+    def naechste_freie_ablage_id(self) -> int:
+        used = {a.id for a in self.ablage_liste()}
+        i = 1
+        while i in used:
+            i += 1
+        return i
+
+    # ---------- Magazin ----------
+    def magazin_liste(self) -> list:
+        with self._lock:
+            return [MagazinConfig.from_dict(d)
+                    for d in (self._data.get("magazine") or [])]
+
+    def magazin(self, magazin_id: int) -> "Optional[MagazinConfig]":
+        for m in self.magazin_liste():
+            if m.id == magazin_id:
+                return m
+        return None
+
+    def magazin_setzen(self, mc: MagazinConfig) -> None:
+        with self._lock:
+            liste = self._data.setdefault("magazine", [])
+            for i, d in enumerate(liste):
+                if int(d.get("id", 0)) == mc.id:
+                    liste[i] = mc.to_dict(); self._save(); return
+            liste.append(mc.to_dict())
+            liste.sort(key=lambda x: int(x["id"]))
+            self._save()
+
+    def magazin_entfernen(self, magazin_id: int) -> bool:
+        with self._lock:
+            liste = self._data.get("magazine", [])
+            for i, d in enumerate(liste):
+                if int(d.get("id", 0)) == magazin_id:
+                    liste.pop(i); self._save(); return True
+        return False
+
+    def magazin_verfuegbar_setzen(self, magazin_id: int, verfuegbar: bool) -> None:
+        with self._lock:
+            for d in (self._data.get("magazine") or []):
+                if int(d.get("id", 0)) == magazin_id:
+                    d["verfuegbar"] = verfuegbar; self._save(); return
+
+    def naechstes_verfuegbares_magazin(self) -> "Optional[MagazinConfig]":
+        for m in self.magazin_liste():
+            if m.verfuegbar:
+                return m
+        return None
+
+    def naechste_freie_magazin_id(self) -> int:
+        used = {m.id for m in self.magazin_liste()}
+        i = 1
+        while i in used:
+            i += 1
+        return i
 
     # ---------- GPIO ----------
     def gpio_drucker_fertig(self) -> Dict[int, int]:

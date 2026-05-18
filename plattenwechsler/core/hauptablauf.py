@@ -43,7 +43,7 @@ from ..config import Config, Position
 from ..types import (
     SystemState, EspState, ErrorClass,
     Auftrag, AuftragQuelle, DruckerStatus,
-    DoorArmPosition, DruckerConfig,
+    DoorArmPosition, DruckerConfig, AblageConfig, MagazinConfig,
     PlattenwechslerError, EspKommunikationsError, EspBefehlAbgelehnt,
     EspTimeoutError,
 )
@@ -299,10 +299,22 @@ class Hauptablauf:
                 self.fehler.melde(e.klasse, f"Service: MOVE_HOME: {e.nachricht}",
                                    esp_code=e.esp_code)
                 return False
-        pos = self.config.position(ziel_name)
-        if pos is None: return False
+        if ziel_name == "ablage":
+            slots = self.config.ablage_liste()
+            if not slots: return False
+            s = slots[0]
+            x, z = s.x, s.z
+        elif ziel_name == "magazin":
+            slots = self.config.magazin_liste()
+            if not slots: return False
+            s = slots[0]
+            x, z = s.x, s.z
+        else:
+            pos = self.config.position(ziel_name)
+            if pos is None: return False
+            x, z = pos.x, pos.z
         try:
-            self.esp.move_to(pos.x, pos.z, timeout_s=self._move_timeout_s)
+            self.esp.move_to(x, z, timeout_s=self._move_timeout_s)
             return True
         except PlattenwechslerError as e:
             self.fehler.melde(e.klasse, f"Service: Fahrt zu {ziel_name}: {e.nachricht}",
@@ -417,11 +429,16 @@ class Hauptablauf:
     def _plattenwechsel(self, a: Auftrag, d: DruckerConfig):
         logger.info("Plattenwechsel start: %s", a)
         self._queue_bei_quittierung_leeren = True
-        ablage = self.config.position("ablage")
-        magazin = self.config.position("magazin")
-        if not (ablage and magazin):
-            raise PlattenwechslerError(ErrorClass.INTERNER_FEHLER,
-                "Konfig: Ablage oder Magazin nicht definiert")
+
+        ablage = self.config.naechste_freie_ablage()
+        if ablage is None:
+            raise PlattenwechslerError(ErrorClass.ABLAGE_VOLL,
+                "Kein freier Ablage-Platz — bitte Ablagen leeren und als frei markieren")
+
+        magazin = self.config.naechstes_verfuegbares_magazin()
+        if magazin is None:
+            raise PlattenwechslerError(ErrorClass.MAGAZIN_LEER,
+                "Kein Magazin-Platz verfügbar — bitte Platten einlegen und als verfügbar markieren")
 
         # Phase 1: alte Platte aus Drucker holen
         self._tuer_oeffnen(d)
@@ -431,15 +448,19 @@ class Hauptablauf:
         self._fahre(d.pos_x, d.pos_z_tuer, f"Drucker {d.id} Tür-Höhe (raus)")
         self._tuer_schliessen()
 
-        # Phase 2: alte Platte ablegen
-        self._fahre(ablage.x, ablage.z, "Ablage")
-        self._deposit(ablage.gripper_depth, ablage.lift_offset, "Ablage")
+        # Phase 2: alte Platte ablegen — Ablage als belegt markieren
+        self._fahre(ablage.x, ablage.z, f"Ablage {ablage.id}")
+        self._deposit(ablage.gripper_depth, ablage.lift_offset, f"Ablage {ablage.id}")
         self.esp.status.has_plate = False
+        self.config.ablage_belegt_setzen(ablage.id, True)
+        logger.info("Ablage %d als belegt markiert", ablage.id)
 
-        # Phase 3: neue Platte aus Magazin
-        self._fahre(magazin.x, magazin.z, "Magazin")
-        self._pickup(magazin.gripper_depth, magazin.lift_offset, "Magazin")
+        # Phase 3: neue Platte aus Magazin — Magazin als leer markieren
+        self._fahre(magazin.x, magazin.z, f"Magazin {magazin.id}")
+        self._pickup(magazin.gripper_depth, magazin.lift_offset, f"Magazin {magazin.id}")
         self.esp.status.has_plate = True
+        self.config.magazin_verfuegbar_setzen(magazin.id, False)
+        logger.info("Magazin %d als leer markiert", magazin.id)
 
         # Phase 4: neue Platte in Drucker einsetzen
         self._tuer_oeffnen(d)

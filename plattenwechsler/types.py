@@ -48,6 +48,8 @@ class ErrorClass(Enum):
     ENTNAHMEFEHLER = "Entnahmefehler"
     NOT_AUS = "Not-Aus"
     INTERNER_FEHLER = "Interner Fehler"
+    ABLAGE_VOLL = "Ablage voll"
+    MAGAZIN_LEER = "Magazin leer"
 
 
 ESP_ERROR_TO_CLASS = {
@@ -153,6 +155,56 @@ class EspStatus:
     plate_detected: bool = False     # ESP-Sensor: Platte liegt auf der Gabel
     last_update: float = 0.0
     has_plate: bool = False         # Pi-intern (während Plattenwechsel)
+
+
+@dataclass
+class AblageConfig:
+    id: int
+    name: str = ""
+    x: int = 0
+    z: int = 0
+    gripper_depth: int = 120
+    lift_offset: int = 8
+    belegt: bool = False
+
+    def to_dict(self) -> dict:
+        return {"id": self.id, "name": self.name, "x": self.x, "z": self.z,
+                "gripper_depth": self.gripper_depth, "lift_offset": self.lift_offset,
+                "belegt": self.belegt}
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "AblageConfig":
+        return cls(id=int(d["id"]),
+                   name=str(d.get("name", "") or f"Ablage {d['id']}"),
+                   x=int(d.get("x", 0)), z=int(d.get("z", 0)),
+                   gripper_depth=int(d.get("gripper_depth", 120)),
+                   lift_offset=int(d.get("lift_offset", 8)),
+                   belegt=bool(d.get("belegt", False)))
+
+
+@dataclass
+class MagazinConfig:
+    id: int
+    name: str = ""
+    x: int = 0
+    z: int = 0
+    gripper_depth: int = 120
+    lift_offset: int = 8
+    verfuegbar: bool = True
+
+    def to_dict(self) -> dict:
+        return {"id": self.id, "name": self.name, "x": self.x, "z": self.z,
+                "gripper_depth": self.gripper_depth, "lift_offset": self.lift_offset,
+                "verfuegbar": self.verfuegbar}
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "MagazinConfig":
+        return cls(id=int(d["id"]),
+                   name=str(d.get("name", "") or f"Magazin {d['id']}"),
+                   x=int(d.get("x", 0)), z=int(d.get("z", 0)),
+                   gripper_depth=int(d.get("gripper_depth", 120)),
+                   lift_offset=int(d.get("lift_offset", 8)),
+                   verfuegbar=bool(d.get("verfuegbar", True)))
 
 
 @dataclass
