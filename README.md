@@ -6,14 +6,13 @@ Automatisiertes Bauplatten-Wechselsystem für mehrere 3D-Drucker.
 
 ## Mechanik
 
-- **Schlitten** mit Halteservo (Klemme) und Türarm-Hebel — fährt entlang X/Z
-- **Halteservo** klemmt die Platte (Positionen `OPEN`/`CLOSED`/`SERVICE`)
-- **Türarm** drückt einzelne Drucker-Türen auf (`OPEN`/`CLOSED`)
+- **Schlitten** fährt entlang X/Z über zwei Achsen
+- **Greifer** klemmt die Bauplatte (Positionen `OPEN`/`CLOSED`)
+- **Türarm** öffnet und schließt einzelne Drucker-Türen (Bogenbewegung, konfigurierbar über Radius und Winkel)
 - **TF-Luna LiDAR** am Schlitten: Hindernisscan vor jeder Fahrt aus Home
-- **VL53L0X** am Schlitten: prüft nach Anfahrt vor dem Drucker, ob die Tür
-  wirklich offen ist (`door_open` im STATUS)
-- **Magazin** mit einer Ersatzplatte (1:1-Tausch)
-- **Ablage** für die fertige Platte
+- **VL53L0X** am Schlitten: prüft nach Anfahrt vor dem Drucker, ob die Tür wirklich offen ist (`door_open` im STATUS)
+- **Magazin** mit Ersatzplatten (1:1-Tausch, mehrere Slots möglich)
+- **Ablage** für fertige Platten (mehrere Slots möglich)
 
 ## Architektur
 
@@ -29,21 +28,26 @@ Automatisiertes Bauplatten-Wechselsystem für mehrere 3D-Drucker.
              │ UART (115200 8N1)
 ┌────────────┴─────────────────────────────────┐
 │ ESP32 auf dem Schlitten                      │
+│  (Motoren, Greifer, Türarm, Sensoren)        │
 └──────────────────────────────────────────────┘
 ```
 
 ## Plattenwechsel-Ablauf
 
-Pi orchestriert über `MOVE_TO`, `SET_CLAMP`, `SET_DOOR_ARM`. Der genaue
-Ablauf siehe [`docs/Schnittstellen.md`](docs/Schnittstellen.md). Kurz:
+Der Pi orchestriert den gesamten Ablauf über `MOVE_TO`, `PICKUP`, `DEPOSIT`, `OPEN_DOOR`, `CLOSE_DOOR`. Kurzübersicht:
 
 ```
-Drucker → Anfahrt → Tür auf → Druckbett → Klemme zu → raus → Tür zu
-       → Ablage → Klemme auf
-       → Magazin → Klemme zu
-       → Drucker → Anfahrt → Tür auf → Druckbett → Klemme auf → raus → Tür zu
-       → Home
+Drucker → Anfahrt → Tür auf (OPEN_DOOR)
+        → Druckbett → Greifer schließt (PICKUP)
+        → raus → Tür zu (CLOSE_DOOR)
+        → Ablage → Greifer öffnet (DEPOSIT)
+        → Magazin → Greifer schließt (PICKUP)
+        → Drucker → Anfahrt → Tür auf (OPEN_DOOR)
+        → Druckbett → Greifer öffnet (DEPOSIT)
+        → raus → Tür zu (CLOSE_DOOR) → Home
 ```
+
+Detaillierte Schnittstellenbeschreibung: [`docs/Schnittstellen_Doku.md`](docs/Schnittstellen_Doku.md)
 
 ## Drucker-Konfiguration
 
@@ -52,14 +56,26 @@ Drucker werden zur Laufzeit über die UI oder Web-App verwaltet. Pro Drucker:
 | Feld | Bedeutung |
 |---|---|
 | Name | freier Anzeigename |
-| Pin Fertig-Taster | GPIO-Pin (BCM) |
-| X-Position | mm |
+| Pin Fertig | GPIO-Pin (BCM) des Fertig-Signals |
+| X-Position | X-Koordinate vor dem Drucker (mm) |
 | Z Anfahrt | sichere Höhe vor dem Drucker (mm) |
-| Z Türarm-Höhe | Höhe an der der Türarm angreift (mm) |
+| Z Türarm-Höhe | Höhe, auf der der Türarm angreift (mm) |
 | Z Druckbett | Höhe für Platte greifen/einsetzen (mm) |
-| Türarm-Hub | Info-Wert (mm) |
+| Türarm-Hub | Ausfahrlänge des Türarms (mm) |
+| Türradius | Abstand Türangel–Türarm-Angriffspunkt (mm) |
+| Öffnungswinkel | Bogenwinkel beim Öffnen/Schließen (°) |
+| Greifer-Tiefe | Einfahrtiefe des Greifers (mm) |
+| Lift-Offset | Anhebung nach Pickup / vor Deposit (mm) |
 
 Änderungen werden direkt in `config.yaml` gespeichert.
+
+> **Hinweis:** Jeder GPIO-Pin darf nur einmal als Fertig-Pin vergeben werden. Die UI verhindert Doppelbelegungen.
+
+## Ablage & Magazin
+
+Jeder Slot (Ablage und Magazin) ist einzeln konfigurierbar (X/Z-Position, Greifer-Tiefe, Lift-Offset). Der Ablauf wählt automatisch den ersten passenden Slot (First-Fit). Der Belegungs-/Verfügbarkeitsstatus wird in `config.yaml` persistiert.
+
+Im Service-Modus kann jeder Slot einzeln angefahren werden.
 
 ## Installation auf dem Pi
 
@@ -114,34 +130,47 @@ Erreichbar unter `http://<pi-ip>:5000`
 
 5 Tabs in UI und Web-App:
 
-- **Status** — Übersicht: Systemzustand, Position, Drucker, Queue
-- **Manuell** — Plattenwechsel pro Drucker auslösen
-- **Service** — Schlitten zu Drucker/Position fahren, Referenzfahrt
-- **Drucker** — Drucker hinzufügen, bearbeiten, entfernen
-- **Fehler** — aktueller Fehler, Quittierung, Historie
+| Tab | Funktion |
+|---|---|
+| **Status** | Übersicht: Systemzustand, Position, Drucker, Queue |
+| **Manuell** | Plattenwechsel pro Drucker manuell auslösen |
+| **Service** | Schlitten zu Drucker/Ablage/Magazin fahren, Referenzfahrt |
+| **Drucker** | Drucker hinzufügen, bearbeiten, entfernen |
+| **Fehler** | aktueller Fehler, Quittierung, Fehlerhistorie |
 
-Der **STOP-Button** ist immer erreichbar.
+Der **STOP-Button** ist jederzeit erreichbar und hält alle Motorbewegungen sofort an.
 
 ## MQTT-Topics
 
 **Status (retained):**
-- `plattenwechsler/status/system` — kompletter Pi-Snapshot
-- `plattenwechsler/status/esp` — ESP-Snapshot
-- `plattenwechsler/status/online` — `online`/`offline`
-- `plattenwechsler/status/drucker/<id>` — pro Drucker
+
+| Topic | Inhalt |
+|---|---|
+| `plattenwechsler/status/system` | kompletter Pi-Snapshot |
+| `plattenwechsler/status/esp` | ESP-Snapshot |
+| `plattenwechsler/status/online` | `online` / `offline` |
+| `plattenwechsler/status/drucker/<id>` | Status pro Drucker |
 
 **Events:**
-- `plattenwechsler/error` — bei neuem Fehler
-- `plattenwechsler/event/auftrag` — bei abgeschlossenem Plattenwechsel
+
+| Topic | Auslöser |
+|---|---|
+| `plattenwechsler/error` | neuer Fehler |
+| `plattenwechsler/event/auftrag` | abgeschlossener Plattenwechsel |
 
 **Befehle:**
-- `plattenwechsler/cmd/auftrag` `{"drucker_id": N}`
-- `plattenwechsler/cmd/quittieren` / `referenzfahrt` / `stop`
-- `plattenwechsler/cmd/service/modus` `{"aktiv": true}`
-- `plattenwechsler/cmd/service/fahre` `{"ziel": "home"|"ablage"|"magazin"}`
-- `plattenwechsler/cmd/service/drucker` `{"drucker_id": N}`
-- `plattenwechsler/cmd/drucker/setzen` `{"id":..., "pos_x":..., ...}`
-- `plattenwechsler/cmd/drucker/entfernen` `{"id": N}`
+
+| Topic | Payload | Wirkung |
+|---|---|---|
+| `plattenwechsler/cmd/auftrag` | `{"drucker_id": N}` | Plattenwechsel starten |
+| `plattenwechsler/cmd/quittieren` | `{}` | Fehler quittieren |
+| `plattenwechsler/cmd/referenzfahrt` | `{}` | Referenzfahrt starten |
+| `plattenwechsler/cmd/stop` | `{}` | Sofort-Stop |
+| `plattenwechsler/cmd/service/modus` | `{"aktiv": true}` | Service-Modus |
+| `plattenwechsler/cmd/service/fahre` | `{"ziel": "home"\|"ablage"\|"magazin"}` | Fahrt im Service-Modus |
+| `plattenwechsler/cmd/service/drucker` | `{"drucker_id": N}` | zu Drucker fahren |
+| `plattenwechsler/cmd/drucker/setzen` | `{"id":..., "pos_x":..., ...}` | Drucker anlegen/aktualisieren |
+| `plattenwechsler/cmd/drucker/entfernen` | `{"id": N}` | Drucker entfernen |
 
 ## Tests
 
@@ -150,13 +179,15 @@ source venv/bin/activate
 pytest tests/ -v
 ```
 
-## Tastatur (Mock-Modus)
+Tests laufen gegen den Mock-ESP (`MockEspClient`) und benötigen keine Hardware.
+
+## Tastatur (Mock-Modus / Entwicklung)
 
 | Taste | Wirkung |
 |---|---|
-| 1–5 | Drucker-fertig-Signal für Drucker N |
-| X / Z | Endschalter X/Z auslösen |
-| Esc | Programm beenden |
+| `1`–`5` | Fertig-Signal für Drucker N simulieren |
+| `X` / `Z` | Endschalter X/Z auslösen |
+| `Esc` | Programm beenden |
 
 ## Fehlerklassen
 
@@ -166,32 +197,34 @@ pytest tests/ -v
 | Fahrfehler | `NOT_REFERENCED`, `MOVE_TIMEOUT`, `HOMING_TIMEOUT`, `POSITION_ERROR`, `DRIVER_FAULT` |
 | Hindernis | `OBSTACLE` |
 | Sensorfehler | `SENSOR_FAULT_OBSTACLE`, `SENSOR_FAULT_GRIPPER` |
-| Türfehler | `door_open=0` nach `SET_DOOR_ARM OPEN` |
-| Entnahmefehler | Pi-intern bei Clamp-Sequenz |
-| Not-Aus | manuell per GPIO |
+| Türfehler | `door_open=0` nach `OPEN_DOOR`, ESP-Fehler bei OPEN/CLOSE_DOOR |
+| Greiferfehler | `PLATE_NOT_DETECTED` nach PICKUP |
+| Not-Aus | GPIO-Signal (konfigurierbar) |
+
+Nach jedem behobenen Fehler ist eine **Referenzfahrt** erforderlich.
 
 ## Projektstruktur
 
 ```
 plattenwechsler/
-├── plattenwechsler/         # Python-Paket
+├── plattenwechsler/             # Python-Paket
 │   ├── core/
-│   │   ├── auftrag_queue.py
-│   │   ├── fehler.py
-│   │   └── hauptablauf.py   # Statemachine
+│   │   ├── auftrag_queue.py     # Auftrags-Queue
+│   │   ├── fehler.py            # Fehlerverwaltung
+│   │   └── hauptablauf.py       # Statemachine & Plattenwechsel-Logik
 │   ├── io_/
-│   │   ├── esp_client.py    # UART zum ESP
-│   │   ├── mock_esp_client.py
-│   │   ├── gpio_manager.py
-│   │   ├── mqtt_client.py
-│   │   └── telegram_client.py
+│   │   ├── esp_client.py        # UART-Schnittstelle zum ESP32
+│   │   ├── mock_esp_client.py   # Software-Mock für Tests
+│   │   ├── gpio_manager.py      # GPIO (Endschalter, Not-Aus, Fertig-Pins)
+│   │   ├── mqtt_client.py       # MQTT-Integration
+│   │   └── telegram_client.py   # Telegram-Bot
 │   ├── ui/
-│   │   └── main_window.py   # PyQt5-UI
-│   ├── config.py            # YAML + dyn. Drucker
-│   ├── logger.py
-│   ├── main.py              # Einstiegspunkt
-│   └── types.py             # Datentypen, Enums
-├── webapp/                  # Flask-App
+│   │   └── main_window.py       # PyQt5-Vollbild-HMI
+│   ├── config.py                # YAML-Konfiguration, DruckerConfig
+│   ├── logger.py                # Logging-Setup
+│   ├── main.py                  # Einstiegspunkt (CLI-Argumente)
+│   └── types.py                 # Datentypen, Enums, EspState
+├── webapp/                      # Flask-Web-App (parallel zur UI)
 │   ├── app.py
 │   ├── templates/index.html
 │   └── static/{style.css,app.js}
@@ -199,8 +232,28 @@ plattenwechsler/
 │   ├── test_protokoll.py
 │   └── test_hauptablauf_mock.py
 ├── docs/
-│   └── Schnittstellen.md
-├── config.yaml
+│   ├── Schnittstellen_Doku.md           # Vollständige Schnittstellendokumentation
+│   ├── Plattenwechsler_Doku_Pi.docx     # Projektdokumentation Pi-Seite
+│   ├── MQTT_Anleitung.docx
+│   ├── generate_doku.py                 # Doku-Generator (python-docx)
+│   ├── esp_code/                        # ESP32-Quellcode
+│   └── src/                             # Weitere Quellen
+├── config.yaml                  # Hauptkonfiguration
 ├── requirements.txt
+├── start.sh
 └── README.md
 ```
+
+## Abhängigkeiten
+
+| Paket | Verwendung |
+|---|---|
+| `PyQt5` | Touch-UI |
+| `pyserial` | UART zum ESP32 |
+| `pyyaml` | Konfiguration |
+| `paho-mqtt` | MQTT-Integration |
+| `gpiozero` | GPIO-Zugriff |
+| `flask` | Web-App |
+| `python-docx` | Dokumentationsgenerator |
+| `matplotlib` | Diagramme in der Doku |
+| `pytest` | Tests |
