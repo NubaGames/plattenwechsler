@@ -80,6 +80,7 @@ class Hauptablauf:
         self._aktiver_drucker: Optional[int] = None
         self._pending_nach_service: set = set()  # Drucker-IDs die im Service-Modus gemeldet haben
 
+        self._aktiver_auftrag: Optional[object] = None  # laufender Auftrag für Wiedereinreihung
         self._drucker_status: dict = {}
         self._refresh_drucker_status_keys()
 
@@ -88,7 +89,7 @@ class Hauptablauf:
         self.on_auftrag_abgelehnt: Optional[Callable] = None
         self.on_drucker_status_changed: Optional[Callable] = None
         self.on_drucker_config_changed: Optional[Callable] = None
-        self.on_fehler_quittiert: Optional[Callable[[bool], None]] = None  # arg: waehrend_plattenwechsel
+        self.on_fehler_quittiert: Optional[Callable[[bool, Optional[str]], None]] = None  # args: waehrend_plattenwechsel, esp_code
 
         self._entscheidung_event = threading.Event()
         self._entscheidung: Optional[dict] = None  # {"referenzfahrt": bool, "queue_leeren": bool}
@@ -415,6 +416,7 @@ class Hauptablauf:
             logger.warning("Drucker %d nicht mehr in Konfig", a.drucker_id)
             return
         self._aktiver_drucker = a.drucker_id
+        self._aktiver_auftrag = a
         self._set_drucker_status(a.drucker_id, DruckerStatus.AKTIV)
         self._set_state(SystemState.PLATTENWECHSEL)
         start = time.time()
@@ -430,6 +432,7 @@ class Hauptablauf:
             if self._aktiver_drucker is not None:
                 self._set_drucker_status(self._aktiver_drucker, DruckerStatus.BEREIT)
             self._aktiver_drucker = None
+            self._aktiver_auftrag = None
             if not self.fehler.hat_fehler:
                 self._set_state(SystemState.BEREITSCHAFT)
 
@@ -584,10 +587,11 @@ class Hauptablauf:
 
         # UI nach Entscheidung fragen (threadsicher über Callback)
         waehrend_pw = self._queue_bei_quittierung_leeren
+        esp_code = self.fehler.aktiver_fehler.esp_code if self.fehler.aktiver_fehler else None
         self._entscheidung = None
         self._entscheidung_event.clear()
         if self.on_fehler_quittiert:
-            try: self.on_fehler_quittiert(waehrend_pw)
+            try: self.on_fehler_quittiert(waehrend_pw, esp_code)
             except Exception: logger.exception("on_fehler_quittiert")
         # Auf Entscheidung warten (max. 5 min, danach Standardverhalten)
         self._entscheidung_event.wait(timeout=self._fehler_dialog_timeout_s)
@@ -614,6 +618,15 @@ class Hauptablauf:
                     self._set_state(SystemState.REFERENZFAHRT)
                 else:
                     self.esp.force_referenced()
+                    # Schlitten physisch zurück zu 0/0 fahren (Endschalter bestätigen Position)
+                    try:
+                        self.esp.move_home(timeout_s=self._home_timeout_s)
+                    except Exception as e:
+                        logger.warning("MOVE_HOME nach Weitermachen fehlgeschlagen: %s", e)
+                    # Fehlgeschlagenen Auftrag wieder vorne einreihen
+                    if self._aktiver_auftrag is not None:
+                        self.queue.vorne_einreihen(self._aktiver_auftrag)
+                        logger.info("Auftrag %s wieder vorne in Queue eingereiht", self._aktiver_auftrag)
                     self._set_state(SystemState.BEREITSCHAFT)
                 return
             else:

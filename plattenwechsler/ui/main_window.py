@@ -137,7 +137,7 @@ class _Signals(QtCore.QObject):
     drucker_status_changed = QtCore.pyqtSignal(int, object)
     drucker_config_changed = QtCore.pyqtSignal()
     toast = QtCore.pyqtSignal(str, str)
-    fehler_quittiert = QtCore.pyqtSignal(bool)  # waehrend_plattenwechsel
+    fehler_quittiert = QtCore.pyqtSignal(bool, object)  # waehrend_plattenwechsel, esp_code
 
 
 # ============================================================
@@ -725,7 +725,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.signals.drucker_status_changed.connect(lambda *_: self._refresh())
         self.signals.drucker_config_changed.connect(self._on_config_changed)
         self.signals.toast.connect(self._toast)
-        self.signals.fehler_quittiert.connect(self._on_fehler_quittiert_dialog)
+        self.signals.fehler_quittiert.connect(lambda w, ec: self._on_fehler_quittiert_dialog(w, ec))
 
         # Hauptablauf → Signals
         self.hauptablauf.on_state_change = lambda s: self.signals.state_changed.emit(s)
@@ -742,7 +742,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.hauptablauf.fehler.on_fehler_geloescht = \
             lambda: self.signals.fehler_geloescht.emit()
         self.hauptablauf.on_fehler_quittiert = \
-            lambda w: self.signals.fehler_quittiert.emit(w)
+            lambda w, ec: self.signals.fehler_quittiert.emit(w, ec)
 
         self._timer = QtCore.QTimer(self)
         self._timer.timeout.connect(self._refresh)
@@ -1925,7 +1925,9 @@ class MainWindow(QtWidgets.QMainWindow):
     def _on_quittieren(self):
         self.hauptablauf.fehler.quittieren()
 
-    def _on_fehler_quittiert_dialog(self, waehrend_plattenwechsel: bool):
+    def _on_fehler_quittiert_dialog(self, waehrend_plattenwechsel: bool, esp_code: Optional[str]):
+        hindernis = esp_code == "OBSTACLE"
+
         dlg = QtWidgets.QDialog(self)
         dlg.setWindowTitle("Fehler quittiert — wie weiter?")
         dlg.setMinimumWidth(400)
@@ -1960,11 +1962,14 @@ class MainWindow(QtWidgets.QMainWindow):
         btn_ref = QtWidgets.QPushButton("Referenzfahrt starten")
         btn_ref.setObjectName("primary")
         btn_ref.setMinimumHeight(44)
-        btn_man = QtWidgets.QPushButton("Manuell fortfahren")
-        btn_man.setMinimumHeight(44)
-
         v.addWidget(btn_ref)
-        v.addWidget(btn_man)
+
+        if hindernis:
+            btn_weiter = QtWidgets.QPushButton("Weitermachen (Hindernis entfernt)")
+            btn_weiter.setMinimumHeight(44)
+            v.addWidget(btn_weiter)
+        else:
+            btn_weiter = None
 
         result = {"referenzfahrt": True, "queue_leeren": waehrend_plattenwechsel}
 
@@ -1974,7 +1979,8 @@ class MainWindow(QtWidgets.QMainWindow):
             dlg.accept()
 
         btn_ref.clicked.connect(lambda: _accept(True))
-        btn_man.clicked.connect(lambda: _accept(False))
+        if btn_weiter:
+            btn_weiter.clicked.connect(lambda: _accept(False))
 
         dlg.exec_()
         self.hauptablauf.entscheidung_nach_fehler(

@@ -32,6 +32,10 @@ class AuftragsQueue:
         with self._lock:
             return self._q.popleft() if self._q else None
 
+    def vorne_einreihen(self, a: Auftrag) -> None:
+        with self._lock:
+            self._q.appendleft(a)
+
     def snapshot(self) -> List[Auftrag]:
         with self._lock:
             return list(self._q)
