@@ -14,8 +14,8 @@ esp:
   skip_homing: false
 gpio:
   endschalter:
-    x: 4
-    z: 17
+    x: 17
+    z: 4
   not_aus:
     pin: 26
     invert: false
