@@ -420,8 +420,10 @@ class Hauptablauf:
         self._set_drucker_status(a.drucker_id, DruckerStatus.AKTIV)
         self._set_state(SystemState.PLATTENWECHSEL)
         start = time.time()
+        erfolg = False
         try:
             self._plattenwechsel(a, d)
+            erfolg = True
             self.stats.auftraege_erfolgreich += 1
             self.stats.letzter_auftrag_dauer_s = time.time() - start
             if self.on_auftrag_erfolgreich:
@@ -432,8 +434,9 @@ class Hauptablauf:
             if self._aktiver_drucker is not None:
                 self._set_drucker_status(self._aktiver_drucker, DruckerStatus.BEREIT)
             self._aktiver_drucker = None
-            self._aktiver_auftrag = None
-            if not self.fehler.hat_fehler:
+            if erfolg:
+                # Nur bei Erfolg direkt aufräumen — bei Fehler übernimmt _fehlerbehandlung_zyklus
+                self._aktiver_auftrag = None
                 self._set_state(SystemState.BEREITSCHAFT)
 
     # ============================================================
@@ -615,6 +618,7 @@ class Hauptablauf:
                 self.fehler.fehler_loeschen()
                 if entscheidung["referenzfahrt"]:
                     self.esp._force_referenced = False
+                    self._aktiver_auftrag = None
                     self._set_state(SystemState.REFERENZFAHRT)
                 else:
                     self.esp.force_referenced()
@@ -627,6 +631,7 @@ class Hauptablauf:
                     if self._aktiver_auftrag is not None:
                         self.queue.vorne_einreihen(self._aktiver_auftrag)
                         logger.info("Auftrag %s wieder vorne in Queue eingereiht", self._aktiver_auftrag)
+                        self._aktiver_auftrag = None
                     self._set_state(SystemState.BEREITSCHAFT)
                 return
             else:
