@@ -300,8 +300,8 @@ class DruckerEditor(QtWidgets.QFrame):
         self.f_hub    = self._spin(0,  500, dc.door_arm_hub_mm,  "mm")
         self.f_gd     = self._spin(0,  500, dc.gripper_depth,    "mm")
         self.f_lo     = self._spin(0,  100, dc.lift_offset,      "mm")
-        self.f_ph1    = self._spin(0,  999, 0, "")
-        self.f_ph2    = self._spin(0,  999, 0, "")
+        self.f_radius = self._spin(0, 9999, dc.tuer_radius, "mm")
+        self.f_winkel = self._spin(0,  360, dc.tuer_winkel, "°")
 
         # Seite 1: Positionen — alle drei Positionswerte in einer Zeile
         p1 = QtWidgets.QWidget()
@@ -318,9 +318,9 @@ class DruckerEditor(QtWidgets.QFrame):
         p2_lay = QtWidgets.QVBoxLayout(p2)
         p2_lay.setContentsMargins(0, 4, 0, 0); p2_lay.setSpacing(6)
         p2_lay.addLayout(self._grid_row(
-            ("Z Türarm",      self.f_tuer), ("Türarm-Hub",    self.f_hub), ("Platzhalter 1", self.f_ph1)))
+            ("Z Türarm",      self.f_tuer), ("Türarm-Hub",    self.f_hub), ("Türradius",     self.f_radius)))
         p2_lay.addLayout(self._grid_row(
-            ("Greifer",       self.f_gd),   ("Hub-Offset",    self.f_lo),  ("Platzhalter 2", self.f_ph2)))
+            ("Greifer",       self.f_gd),   ("Hub-Offset",    self.f_lo),  ("Öffnungswinkel", self.f_winkel)))
         p2_lay.addStretch()
 
         self._stack = QtWidgets.QStackedWidget()
@@ -391,6 +391,8 @@ class DruckerEditor(QtWidgets.QFrame):
             pos_z_tuer=self.f_tuer.value(),
             pos_z_druckbett=self.f_bett.value(),
             door_arm_hub_mm=self.f_hub.value(),
+            tuer_radius=self.f_radius.value(),
+            tuer_winkel=self.f_winkel.value(),
             gripper_depth=self.f_gd.value(),
             lift_offset=self.f_lo.value(),
         )
@@ -512,6 +514,7 @@ class DruckerKonfigKachel(QtWidgets.QFrame):
 
         v.addWidget(self._dim(f"X: {dc.pos_x} mm"))
         v.addWidget(self._dim(f"Z Anfahr: {dc.pos_z_anfahr} mm  ·  Tür: {dc.pos_z_tuer} mm"))
+        v.addWidget(self._dim(f"Radius: {dc.tuer_radius} mm  ·  Winkel: {dc.tuer_winkel}°"))
         v.addWidget(self._dim(f"Pin Fertig: {dc.pin_fertig}"))
         v.addStretch()
 

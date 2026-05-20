@@ -1,49 +1,50 @@
 """Hauptablauf-Statemachine.
 
-Plattenwechsel-Sequenz (Pi steuert ESP über PICKUP/DEPOSIT/SET_DOOR_ARM/MOVE_TO):
+Plattenwechsel-Sequenz (Pi steuert ESP über PICKUP/DEPOSIT/OPEN_DOOR/CLOSE_DOOR/MOVE_TO):
 
   Phase 1 — Platte aus Drucker holen:
-    1. MOVE_TO (drucker.x, drucker.z_anfahr)
-    2. MOVE_TO (drucker.x, drucker.z_tuer)
-    3. SET_DOOR_ARM OPEN
-    4. MOVE_TO (drucker.x, drucker.z_druckbett)   ← Gabel-Bereitschaftspos.
-    5. PICKUP (gripper_depth, lift_offset)          ← ESP prüft door_open intern
-    6. MOVE_TO (drucker.x, drucker.z_tuer)
-    7. SET_DOOR_ARM CLOSED
+    1. MOVE_TO (drucker.x, drucker.z_anfahr)       ← Ausgangsposition
+    2. OPEN_DOOR (x_approach=pos_x, z_approach=pos_z_tuer, arm_extend, radius, angle)
+       → ESP fährt intern zur Tür, öffnet sie per Kreisbogen, kehrt zurück
+    3. MOVE_TO (drucker.x, drucker.z_druckbett)    ← Gabel-Bereitschaftspos.
+    4. PICKUP (gripper_depth, lift_offset)          ← ESP prüft door_open intern
+    5. MOVE_TO (drucker.x, drucker.z_anfahr)       ← zurück zur Ausgangsposition
+    6. CLOSE_DOOR (x_approach=berechnet, z_approach=pos_z_tuer, ...)
+       → ESP schließt Tür per Kreisbogen, kehrt zurück
 
   Phase 2 — Platte ablegen:
-    8. MOVE_TO ablage
-    9. DEPOSIT (gripper_depth, lift_offset)
+    7. MOVE_TO ablage
+    8. DEPOSIT (gripper_depth, lift_offset)
 
   Phase 3 — Neue Platte holen:
-   10. MOVE_TO magazin
-   11. PICKUP (gripper_depth, lift_offset)
+    9. MOVE_TO magazin
+   10. PICKUP (gripper_depth, lift_offset)
 
   Phase 4 — Platte in Drucker einsetzen:
-   12. MOVE_TO (drucker.x, drucker.z_anfahr)
-   13. MOVE_TO (drucker.x, drucker.z_tuer)
-   14. SET_DOOR_ARM OPEN
-   15. MOVE_TO (drucker.x, drucker.z_druckbett)
-   16. DEPOSIT (gripper_depth, lift_offset)
-   17. MOVE_TO (drucker.x, drucker.z_tuer)
-   18. SET_DOOR_ARM CLOSED
+   11. MOVE_TO (drucker.x, drucker.z_anfahr)
+   12. OPEN_DOOR (...)
+   13. MOVE_TO (drucker.x, drucker.z_druckbett)
+   14. DEPOSIT (gripper_depth, lift_offset)
+   15. MOVE_TO (drucker.x, drucker.z_anfahr)
+   16. CLOSE_DOOR (...)
 
   Phase 5 — Heimfahrt (nur wenn Queue leer):
-   19. MOVE_HOME
+   17. MOVE_HOME
 """
 from __future__ import annotations
 
 import logging
+import math
 import threading
 import time
 from dataclasses import dataclass
 from typing import Callable, Optional
 
-from ..config import Config, Position
+from ..config import Config
 from ..types import (
     SystemState, EspState, ErrorClass,
     Auftrag, AuftragQuelle, DruckerStatus,
-    DoorArmPosition, DruckerConfig, AblageConfig, MagazinConfig,
+    DruckerConfig,
     PlattenwechslerError, EspKommunikationsError, EspBefehlAbgelehnt,
     EspTimeoutError,
 )
@@ -437,8 +438,7 @@ class Hauptablauf:
         self._fahre(d.pos_x, d.pos_z_druckbett, f"Drucker {d.id} Abholposition")
         self._pickup(d.gripper_depth, d.lift_offset, f"Drucker {d.id}")
         self.esp.status.has_plate = True
-        self._fahre(d.pos_x, d.pos_z_tuer, f"Drucker {d.id} Tür-Höhe (raus)")
-        self._tuer_schliessen()
+        self._tuer_schliessen(d)
 
         # Phase 2: alte Platte ablegen — Ablage als belegt markieren
         self._fahre(ablage.x, ablage.z, f"Ablage {ablage.id}")
@@ -459,8 +459,7 @@ class Hauptablauf:
         self._fahre(d.pos_x, d.pos_z_druckbett, f"Drucker {d.id} Einlegeposition")
         self._deposit(d.gripper_depth, d.lift_offset, f"Drucker {d.id}")
         self.esp.status.has_plate = False
-        self._fahre(d.pos_x, d.pos_z_tuer, f"Drucker {d.id} Tür-Höhe (raus)")
-        self._tuer_schliessen()
+        self._tuer_schliessen(d)
 
         # Phase 5: Heim — nur wenn keine weiteren Aufträge warten
         if self.queue.is_empty():
@@ -471,28 +470,37 @@ class Hauptablauf:
         logger.info("Plattenwechsel %s erfolgreich", a)
 
     def _tuer_oeffnen(self, d: DruckerConfig):
-        self._fahre(d.pos_x, d.pos_z_anfahr, f"Drucker {d.id} Anfahrt")
-        self._fahre(d.pos_x, d.pos_z_tuer, f"Drucker {d.id} Tür-Höhe")
+        self._fahre(d.pos_x, d.pos_z_anfahr, f"Drucker {d.id} Ausgangsposition")
+        logger.info("OPEN_DOOR Drucker %d", d.id)
         try:
-            self.esp.set_door_arm(DoorArmPosition.OPEN,
-                                   timeout_s=self._mech_timeout_s)
+            self.esp.open_door(
+                x_approach=d.pos_x, z_approach=d.pos_z_tuer,
+                arm_extend=d.door_arm_hub_mm,
+                radius=d.tuer_radius, angle=d.tuer_winkel,
+                timeout_s=self._move_timeout_s)
         except EspBefehlAbgelehnt as e:
             raise PlattenwechslerError(ErrorClass.TUERFEHLER,
-                f"Türarm öffnen: {e.esp_code}", esp_code=e.esp_code)
+                f"Tür öffnen: {e.esp_code}", esp_code=e.esp_code)
         except (EspTimeoutError, EspKommunikationsError) as e:
             raise PlattenwechslerError(ErrorClass.TUERFEHLER,
-                f"Türarm öffnen: {e}")
+                f"Tür öffnen: {e}")
 
-    def _tuer_schliessen(self):
+    def _tuer_schliessen(self, d: DruckerConfig):
+        x_close = d.pos_x + int(d.tuer_radius * (math.cos(math.radians(d.tuer_winkel)) - 1))
+        self._fahre(d.pos_x, d.pos_z_anfahr, f"Drucker {d.id} Ausgangsposition (Schließen)")
+        logger.info("CLOSE_DOOR Drucker %d x_approach=%d", d.id, x_close)
         try:
-            self.esp.set_door_arm(DoorArmPosition.CLOSED,
-                                   timeout_s=self._mech_timeout_s)
+            self.esp.close_door(
+                x_approach=x_close, z_approach=d.pos_z_tuer,
+                arm_extend=d.door_arm_hub_mm,
+                radius=d.tuer_radius, angle=d.tuer_winkel,
+                timeout_s=self._move_timeout_s)
         except EspBefehlAbgelehnt as e:
             raise PlattenwechslerError(ErrorClass.TUERFEHLER,
-                f"Türarm schließen: {e.esp_code}", esp_code=e.esp_code)
+                f"Tür schließen: {e.esp_code}", esp_code=e.esp_code)
         except (EspTimeoutError, EspKommunikationsError) as e:
             raise PlattenwechslerError(ErrorClass.TUERFEHLER,
-                f"Türarm schließen: {e}")
+                f"Tür schließen: {e}")
 
     def _fahre(self, x: int, z: int, kontext: str):
         logger.info("MOVE_TO %s (x=%d z=%d)", kontext, x, z)

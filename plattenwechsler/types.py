@@ -29,14 +29,11 @@ class EspState(Enum):
     BUSY_MOVE_HOME = "BUSY_MOVE_HOME"
     BUSY_PICKUP = "BUSY_PICKUP"
     BUSY_DEPOSIT = "BUSY_DEPOSIT"
+    BUSY_OPEN_DOOR = "BUSY_OPEN_DOOR"
+    BUSY_CLOSE_DOOR = "BUSY_CLOSE_DOOR"
     STOPPED = "STOPPED"
     ERROR = "ERROR"
     UNKNOWN = "UNKNOWN"
-
-
-class DoorArmPosition(Enum):
-    OPEN = "OPEN"
-    CLOSED = "CLOSED"
 
 
 class ErrorClass(Enum):
@@ -106,6 +103,8 @@ class DruckerConfig:
     pos_z_tuer: int = 0
     pos_z_druckbett: int = 0
     door_arm_hub_mm: int = 50
+    tuer_radius: int = 150
+    tuer_winkel: int = 90
     gripper_depth: int = 120
     lift_offset: int = 8
 
@@ -115,6 +114,7 @@ class DruckerConfig:
             "pos_x": self.pos_x, "pos_z_anfahr": self.pos_z_anfahr,
             "pos_z_tuer": self.pos_z_tuer, "pos_z_druckbett": self.pos_z_druckbett,
             "door_arm_hub_mm": self.door_arm_hub_mm,
+            "tuer_radius": self.tuer_radius, "tuer_winkel": self.tuer_winkel,
             "gripper_depth": self.gripper_depth, "lift_offset": self.lift_offset,
         }
 
@@ -129,6 +129,8 @@ class DruckerConfig:
             pos_z_tuer=int(d.get("pos_z_tuer", 0)),
             pos_z_druckbett=int(d.get("pos_z_druckbett", 0)),
             door_arm_hub_mm=int(d.get("door_arm_hub_mm", 50)),
+            tuer_radius=int(d.get("tuer_radius", 150)),
+            tuer_winkel=int(d.get("tuer_winkel", 90)),
             gripper_depth=int(d.get("gripper_depth", 120)),
             lift_offset=int(d.get("lift_offset", 8)),
         )

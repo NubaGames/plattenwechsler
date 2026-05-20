@@ -28,6 +28,8 @@ drucker:
   pos_z_tuer: 220
   pos_z_druckbett: 50
   door_arm_hub_mm: 50
+  tuer_radius: 150
+  tuer_winkel: 90
   gripper_depth: 120
   lift_offset: 8
 - id: 2

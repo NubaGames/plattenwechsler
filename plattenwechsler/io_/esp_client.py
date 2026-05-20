@@ -1,7 +1,7 @@
 """ESP-Client (UART) — Pi ↔ ESP32 nach Schnittstellen-Spezifikation Mai 2026.
 
 Befehle: PING, STATUS, STREAM_ON/OFF, HOME, MOVE_HOME, MOVE_TO, STOP,
-RESET_ERROR, HOME_SWITCH_HIT, PICKUP, DEPOSIT, SET_DOOR_ARM.
+RESET_ERROR, HOME_SWITCH_HIT, PICKUP, DEPOSIT, OPEN_DOOR, CLOSE_DOOR.
 """
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ from typing import Callable, Optional
 
 from ..types import (
     EspKommunikationsError, EspBefehlAbgelehnt, EspTimeoutError,
-    EspState, EspStatus, DoorArmPosition,
+    EspState, EspStatus,
 )
 
 logger = logging.getLogger(__name__)
@@ -144,13 +144,23 @@ class BaseEspClient:
                                  gripper_depth=gripper_depth, lift_offset=lift_offset)
         self.wait_for_event(msg.msg_id, "DEPOSIT_DONE", timeout_s=timeout_s)
 
-    def set_door_arm(self, position: DoorArmPosition,
-                     timeout_s: float = 10.0):
-        msg = self.send_and_wait("SET_DOOR_ARM", position=position.value)
-        self.wait_for_event(msg.msg_id, {
-            DoorArmPosition.OPEN: "DOOR_ARM_OPEN",
-            DoorArmPosition.CLOSED: "DOOR_ARM_CLOSED",
-        }[position], timeout_s=timeout_s)
+    def open_door(self, x_approach: int, z_approach: int, arm_extend: int,
+                  radius: int, angle: int, hook_drop: int = 0,
+                  timeout_s: float = 30.0):
+        msg = self.send_and_wait("OPEN_DOOR",
+                                 x_approach=x_approach, z_approach=z_approach,
+                                 arm_extend=arm_extend, radius=radius,
+                                 angle=angle, hook_drop=hook_drop)
+        self.wait_for_event(msg.msg_id, "DOOR_OPEN_DONE", timeout_s=timeout_s)
+
+    def close_door(self, x_approach: int, z_approach: int, arm_extend: int,
+                   radius: int, angle: int, hook_drop: int = 0,
+                   timeout_s: float = 30.0):
+        msg = self.send_and_wait("CLOSE_DOOR",
+                                 x_approach=x_approach, z_approach=z_approach,
+                                 arm_extend=arm_extend, radius=radius,
+                                 angle=angle, hook_drop=hook_drop)
+        self.wait_for_event(msg.msg_id, "DOOR_CLOSE_DONE", timeout_s=timeout_s)
 
 
 # ============================================================

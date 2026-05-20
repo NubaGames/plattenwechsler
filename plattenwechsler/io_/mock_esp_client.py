@@ -32,7 +32,7 @@ class MockEspClient(BaseEspClient):
 
         # Fehler-Injection
         self.simuliere_fehler: Optional[str] = None
-        # Wenn False: SET_DOOR_ARM OPEN setzt door_open nicht auf True
+        # Wenn False: OPEN_DOOR setzt door_open nicht auf True
         # (simuliert Tür die sich nicht geöffnet hat)
         self.tuer_offen_wenn_arm_aus = True
 
@@ -199,16 +199,20 @@ class MockEspClient(BaseEspClient):
                              args=(cmd_id, lo), daemon=True).start()
             return ack
 
-        if befehl == "SET_DOOR_ARM":
-            if self.status.state == EspState.ERROR or self.status.busy:
+        if befehl == "OPEN_DOOR":
+            if not self.status.referenced or self.status.state == EspState.ERROR:
                 raise EspBefehlAbgelehnt("INVALID_STATE")
-            pos = params.get("position", "CLOSED")
-            evmap = {"OPEN": "DOOR_ARM_OPEN", "CLOSED": "DOOR_ARM_CLOSED"}
-            if pos not in evmap:
-                raise EspBefehlAbgelehnt("INVALID_COMMAND")
-            threading.Thread(target=self._async_door_arm,
-                             args=(cmd_id, pos, evmap[pos]),
-                             daemon=True).start()
+            self._fire_state(EspState.BUSY_OPEN_DOOR)
+            threading.Thread(target=self._async_open_door,
+                             args=(cmd_id,), daemon=True).start()
+            return ack
+
+        if befehl == "CLOSE_DOOR":
+            if not self.status.referenced or self.status.state == EspState.ERROR:
+                raise EspBefehlAbgelehnt("INVALID_STATE")
+            self._fire_state(EspState.BUSY_CLOSE_DOOR)
+            threading.Thread(target=self._async_close_door,
+                             args=(cmd_id,), daemon=True).start()
             return ack
 
         raise EspBefehlAbgelehnt("INVALID_COMMAND")
@@ -317,12 +321,21 @@ class MockEspClient(BaseEspClient):
         self._fire_event_ok(cmd_id, "DEPOSIT_DONE")
         self._fire_state(EspState.READY)
 
-    def _async_door_arm(self, cmd_id: int, pos: str, evname: str):
+    def _async_open_door(self, cmd_id: int):
         time.sleep(self._mech_dauer_s)
         with self._lock:
-            self.status.door_arm_home = (pos == "CLOSED")
-            if pos == "OPEN":
-                # Türsensor: Tür offen wenn Arm ausfährt (außer im Fehler-Test)
-                self.status.door_open = self.tuer_offen_wenn_arm_aus
-            # Bei CLOSED: door_open bleibt True (offener Raum nach dem Wegfahren)
-        self._fire_event_ok(cmd_id, evname)
+            if self.status.state != EspState.BUSY_OPEN_DOOR:
+                return
+            self.status.door_arm_home = False
+            self.status.door_open = self.tuer_offen_wenn_arm_aus
+        self._fire_event_ok(cmd_id, "DOOR_OPEN_DONE")
+        self._fire_state(EspState.READY)
+
+    def _async_close_door(self, cmd_id: int):
+        time.sleep(self._mech_dauer_s)
+        with self._lock:
+            if self.status.state != EspState.BUSY_CLOSE_DOOR:
+                return
+            self.status.door_arm_home = True
+        self._fire_event_ok(cmd_id, "DOOR_CLOSE_DONE")
+        self._fire_state(EspState.READY)
