@@ -20,6 +20,12 @@ class MockEspClient(BaseEspClient):
     def __init__(self, move_dauer_s: float = 0.4, home_dauer_s: float = 0.8,
                  mech_dauer_s: float = 0.3):
         super().__init__()
+
+    def force_referenced(self):
+        super().force_referenced()
+        with self._lock:
+            self.status.state = EspState.READY
+        self._fire_state(EspState.READY)
         self._move_dauer_s = move_dauer_s
         self._home_dauer_s = home_dauer_s
         self._mech_dauer_s = mech_dauer_s
@@ -172,6 +178,14 @@ class MockEspClient(BaseEspClient):
 
         if befehl == "HOME_SWITCH_HIT":
             return ack
+
+        if befehl == "ASSUME_POSITION":
+            if self.status.state != EspState.NOT_REFERENCED:
+                raise EspBefehlAbgelehnt("INVALID_STATE")
+            with self._lock:
+                self.status.referenced = True
+            self._fire_state(EspState.READY)
+            self._fire_event_ok(cmd_id, "ASSUME_POSITION_DONE"); return ack
 
         if befehl == "PICKUP":
             if not self.status.referenced:

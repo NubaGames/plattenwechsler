@@ -2,34 +2,31 @@
 
 Plattenwechsel-Sequenz (Pi steuert ESP über PICKUP/DEPOSIT/OPEN_DOOR/CLOSE_DOOR/MOVE_TO):
 
-  Phase 1 — Platte aus Drucker holen:
+  Phase 1 — Platte aus Drucker holen (Tür bleibt offen):
     1. MOVE_TO (drucker.x, drucker.z_anfahr)       ← Ausgangsposition
     2. OPEN_DOOR (x_approach=pos_x, z_approach=pos_z_tuer, arm_extend, radius, angle)
        → ESP fährt intern zur Tür, öffnet sie per Kreisbogen, kehrt zurück
     3. MOVE_TO (drucker.x, drucker.z_druckbett)    ← Gabel-Bereitschaftspos.
-    4. PICKUP (gripper_depth, lift_offset)          ← ESP prüft door_open intern
+    4. PICKUP (gripper_depth, lift_offset)
     5. MOVE_TO (drucker.x, drucker.z_anfahr)       ← zurück zur Ausgangsposition
-    6. CLOSE_DOOR (x_approach=berechnet, z_approach=pos_z_tuer, ...)
-       → ESP schließt Tür per Kreisbogen, kehrt zurück
 
   Phase 2 — Platte ablegen:
-    7. MOVE_TO ablage
-    8. DEPOSIT (gripper_depth, lift_offset)
+    6. MOVE_TO ablage
+    7. DEPOSIT (gripper_depth, lift_offset)
 
   Phase 3 — Neue Platte holen:
-    9. MOVE_TO magazin
-   10. PICKUP (gripper_depth, lift_offset)
+    8. MOVE_TO magazin
+    9. PICKUP (gripper_depth, lift_offset)
 
-  Phase 4 — Platte in Drucker einsetzen:
-   11. MOVE_TO (drucker.x, drucker.z_anfahr)
-   12. OPEN_DOOR (...)
-   13. MOVE_TO (drucker.x, drucker.z_druckbett)
-   14. DEPOSIT (gripper_depth, lift_offset)
-   15. MOVE_TO (drucker.x, drucker.z_anfahr)
-   16. CLOSE_DOOR (...)
+  Phase 4 — Platte in Drucker einsetzen, dann Tür schließen:
+   10. MOVE_TO (drucker.x, drucker.z_druckbett)
+   11. DEPOSIT (gripper_depth, lift_offset)
+   12. MOVE_TO (drucker.x, drucker.z_anfahr)
+   13. CLOSE_DOOR (x_approach=berechnet, z_approach=pos_z_tuer, ...)
+       → ESP schließt Tür per Kreisbogen, kehrt zurück
 
   Phase 5 — Heimfahrt (nur wenn Queue leer):
-   17. MOVE_HOME
+   14. MOVE_HOME
 """
 from __future__ import annotations
 
@@ -91,11 +88,16 @@ class Hauptablauf:
         self.on_auftrag_abgelehnt: Optional[Callable] = None
         self.on_drucker_status_changed: Optional[Callable] = None
         self.on_drucker_config_changed: Optional[Callable] = None
+        self.on_fehler_quittiert: Optional[Callable[[bool], None]] = None  # arg: waehrend_plattenwechsel
+
+        self._entscheidung_event = threading.Event()
+        self._entscheidung: Optional[dict] = None  # {"referenzfahrt": bool, "queue_leeren": bool}
 
         # Timeouts
         self._move_timeout_s = float(config.get("esp", "move_timeout_s", default=60.0))
         self._home_timeout_s = float(config.get("esp", "home_timeout_s", default=30.0))
         self._mech_timeout_s = float(config.get("esp", "mech_timeout_s", default=10.0))
+        self._fehler_dialog_timeout_s = float(config.get("esp", "fehler_dialog_timeout_s", default=300.0))
 
         # GPIO-Callbacks
         self.gpio.on_drucker_fertig = self._on_drucker_fertig
@@ -260,6 +262,10 @@ class Hauptablauf:
         if self.state == SystemState.PLATTENWECHSEL: return
         self._set_state(SystemState.REFERENZFAHRT)
 
+    def entscheidung_nach_fehler(self, referenzfahrt: bool, queue_leeren: bool):
+        self._entscheidung = {"referenzfahrt": referenzfahrt, "queue_leeren": queue_leeren}
+        self._entscheidung_event.set()
+
     # ============================================================
     # Service
     # ============================================================
@@ -314,6 +320,16 @@ class Hauptablauf:
                 f"Service: Fahrt zu Magazin {magazin_id}: {e.nachricht}", esp_code=e.esp_code)
             return False
 
+    def service_fahre_zu_position(self, x: int, z: int) -> bool:
+        if self.state != SystemState.SERVICE: return False
+        try:
+            self.esp.move_to(x, z, timeout_s=self._move_timeout_s)
+            return True
+        except PlattenwechslerError as e:
+            self.fehler.melde(e.klasse,
+                f"Service: Manuelle Fahrt x={x} z={z}: {e.nachricht}", esp_code=e.esp_code)
+            return False
+
     # ============================================================
     # Worker
     # ============================================================
@@ -359,6 +375,7 @@ class Hauptablauf:
         return True
 
     def _referenzfahrt(self):
+        self.esp._force_referenced = False  # Override aufheben vor echter Referenzfahrt
         # skip_homing: solange Endschalter noch nicht verdrahtet sind,
         # können wir die Referenzfahrt überspringen und den ESP direkt auf
         # READY/referenziert setzen (nur für Tests ohne Hardware-Endschalter).
@@ -433,12 +450,11 @@ class Hauptablauf:
             raise PlattenwechslerError(ErrorClass.MAGAZIN_LEER,
                 "Kein Magazin-Platz verfügbar — bitte Platten einlegen und als verfügbar markieren")
 
-        # Phase 1: alte Platte aus Drucker holen
+        # Phase 1: alte Platte aus Drucker holen — Tür bleibt offen
         self._tuer_oeffnen(d)
         self._fahre(d.pos_x, d.pos_z_druckbett, f"Drucker {d.id} Abholposition")
         self._pickup(d.gripper_depth, d.lift_offset, f"Drucker {d.id}")
         self.esp.status.has_plate = True
-        self._tuer_schliessen(d)
 
         # Phase 2: alte Platte ablegen — Ablage als belegt markieren
         self._fahre(ablage.x, ablage.z, f"Ablage {ablage.id}")
@@ -454,8 +470,7 @@ class Hauptablauf:
         self.config.magazin_verfuegbar_setzen(magazin.id, False)
         logger.info("Magazin %d als leer markiert", magazin.id)
 
-        # Phase 4: neue Platte in Drucker einsetzen
-        self._tuer_oeffnen(d)
+        # Phase 4: neue Platte einsetzen, dann Tür schließen
         self._fahre(d.pos_x, d.pos_z_druckbett, f"Drucker {d.id} Einlegeposition")
         self._deposit(d.gripper_depth, d.lift_offset, f"Drucker {d.id}")
         self.esp.status.has_plate = False
@@ -566,9 +581,19 @@ class Hauptablauf:
             return
         if self._not_aus_aktiv:
             self._not_aus_aktiv = False
-        # Fehler während eines Plattenwechsels: Queue leeren,
-        # da physischer Zustand von Ablage/Magazin/Schlitten unbekannt ist
-        if self._queue_bei_quittierung_leeren:
+
+        # UI nach Entscheidung fragen (threadsicher über Callback)
+        waehrend_pw = self._queue_bei_quittierung_leeren
+        self._entscheidung = None
+        self._entscheidung_event.clear()
+        if self.on_fehler_quittiert:
+            try: self.on_fehler_quittiert(waehrend_pw)
+            except Exception: logger.exception("on_fehler_quittiert")
+        # Auf Entscheidung warten (max. 5 min, danach Standardverhalten)
+        self._entscheidung_event.wait(timeout=self._fehler_dialog_timeout_s)
+        entscheidung = self._entscheidung or {"referenzfahrt": True, "queue_leeren": waehrend_pw}
+
+        if entscheidung["queue_leeren"] and self._queue_bei_quittierung_leeren:
             self._queue_bei_quittierung_leeren = False
             n = self.queue.leeren()
             for did in list(self._drucker_status.keys()):
@@ -576,12 +601,21 @@ class Hauptablauf:
             self.esp.status.has_plate = False
             logger.warning("Plattenwechsel unterbrochen: Queue geleert (%d Aufträge) "
                            "— bitte Ablage, Magazin und Schlitten prüfen", n)
+        elif self._queue_bei_quittierung_leeren:
+            self._queue_bei_quittierung_leeren = False
+
         try:
             if self.esp.is_connected():
                 if self.esp.status.state == EspState.ERROR:
                     self.esp.reset_error()
                 self.fehler.fehler_loeschen()
-                self._set_state(SystemState.REFERENZFAHRT); return
+                if entscheidung["referenzfahrt"]:
+                    self.esp._force_referenced = False
+                    self._set_state(SystemState.REFERENZFAHRT)
+                else:
+                    self.esp.force_referenced()
+                    self._set_state(SystemState.BEREITSCHAFT)
+                return
             else:
                 time.sleep(2.0); return
         except PlattenwechslerError as e:

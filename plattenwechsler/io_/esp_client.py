@@ -71,6 +71,7 @@ class BaseEspClient:
     def __init__(self):
         self.status = EspStatus()
         self._lock = threading.RLock()
+        self._force_referenced: bool = False  # Pi-seitiger Override nach "Weitermachen"
         self.on_state_change: Optional[Callable] = None
         self.on_status_update: Optional[Callable] = None
         self.on_error: Optional[Callable] = None
@@ -128,6 +129,16 @@ class BaseEspClient:
     def reset_error(self):
         msg = self.send_and_wait("RESET_ERROR")
         self.wait_for_event(msg.msg_id, "ERROR_RESET", timeout_s=5.0)
+
+    def force_referenced(self):
+        """Aktuelle Position als Referenz akzeptieren ohne Referenzfahrt.
+        Sendet ACCEPT_POSITION an ESP und setzt Pi-seitigen Override."""
+        msg = self.send_and_wait("ASSUME_POSITION")
+        self.wait_for_event(msg.msg_id, "ASSUME_POSITION_DONE", timeout_s=5.0)
+        with self._lock:
+            self._force_referenced = True
+            self.status.referenced = True
+        logger.warning("referenced Pi-seitig erzwungen — keine Referenzfahrt durchgeführt")
 
     def home_switch_hit(self, axis: str):
         if axis not in ("X", "Z"):
@@ -357,7 +368,8 @@ class EspClient(BaseEspClient):
         except ValueError: new_state = EspState.UNKNOWN
         with self._lock:
             self.status.state = new_state
-            self.status.referenced = fields.get("ref", "0") == "1"
+            if not self._force_referenced:
+                self.status.referenced = fields.get("ref", "0") == "1"
             self._set_int(fields, "x", "x_mm")
             self._set_int(fields, "z", "z_mm")
             self.status.last_update = time.time()
@@ -370,7 +382,8 @@ class EspClient(BaseEspClient):
             try: self.status.state = EspState(f.get("state", "UNKNOWN"))
             except ValueError: self.status.state = EspState.UNKNOWN
             self.status.error = f.get("error", "NONE")
-            self.status.referenced = f.get("ref", "0") == "1"
+            if not self._force_referenced:
+                self.status.referenced = f.get("ref", "0") == "1"
             self._set_int(f, "x", "x_mm")
             self._set_int(f, "z", "z_mm")
             self._set_int(f, "target_x", "target_x_mm")

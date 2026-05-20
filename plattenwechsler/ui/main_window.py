@@ -137,6 +137,132 @@ class _Signals(QtCore.QObject):
     drucker_status_changed = QtCore.pyqtSignal(int, object)
     drucker_config_changed = QtCore.pyqtSignal()
     toast = QtCore.pyqtSignal(str, str)
+    fehler_quittiert = QtCore.pyqtSignal(bool)  # waehrend_plattenwechsel
+
+
+# ============================================================
+# Numpad-Widget
+# ============================================================
+class NumpadWidget(QtWidgets.QFrame):
+    """Ziffernblock für manuelle Positionseingabe (nur Zahlen + Löschen)."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setObjectName("card")
+        self._vals = {"x": "", "z": ""}
+        self._active = "x"
+        self._max_digits = 4  # 0..9999 mm
+
+        root = QtWidgets.QVBoxLayout(self)
+        root.setContentsMargins(10, 10, 10, 10)
+        root.setSpacing(8)
+
+        # --- X / Z + Fahren-Button in einer Zeile ---
+        sel_row = QtWidgets.QHBoxLayout(); sel_row.setSpacing(8)
+        for key, label in (("x", "X"), ("z", "Z")):
+            card = QtWidgets.QPushButton()
+            card.setFocusPolicy(QtCore.Qt.NoFocus)
+            card.setFixedHeight(58)
+            card.clicked.connect(lambda _, k=key: self._select(k))
+            setattr(self, f"_btn_{key}", card)
+
+            inner = QtWidgets.QHBoxLayout(card)
+            inner.setContentsMargins(10, 6, 10, 6); inner.setSpacing(6)
+            axis_lbl = QtWidgets.QLabel(label)
+            axis_lbl.setStyleSheet(
+                f"color: {COL_TEXT_MUTED}; font-size: 18px; font-weight: 700; "
+                "background: transparent;")
+            val = QtWidgets.QLabel("—")
+            val.setStyleSheet(
+                "color: white; font-size: 20px; font-weight: 700; background: transparent;")
+            val.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+            unit = QtWidgets.QLabel("mm")
+            unit.setStyleSheet(
+                f"color: {COL_TEXT_MUTED}; font-size: 11px; background: transparent;")
+            unit.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
+            inner.addWidget(axis_lbl)
+            inner.addWidget(val, stretch=1)
+            inner.addWidget(unit)
+            setattr(self, f"_disp_{key}", val)
+
+            sel_row.addWidget(card, stretch=2)
+
+        # Fahren-Button direkt daneben
+        self._fahren_placeholder = sel_row
+        root.addLayout(sel_row)
+
+        # --- Numpad ---
+        grid = QtWidgets.QGridLayout(); grid.setSpacing(6)
+        grid.setColumnStretch(0, 1); grid.setColumnStretch(1, 1); grid.setColumnStretch(2, 1)
+        keys = [("7", 0, 0), ("8", 0, 1), ("9", 0, 2),
+                ("4", 1, 0), ("5", 1, 1), ("6", 1, 2),
+                ("1", 2, 0), ("2", 2, 1), ("3", 2, 2),
+                ("⌫",  3, 0), ("0", 3, 1), ("C", 3, 2)]
+        for text, row, col in keys:
+            btn = QtWidgets.QPushButton(text)
+            btn.setMinimumHeight(46)
+            btn.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+            btn.setFocusPolicy(QtCore.Qt.NoFocus)
+            btn.setStyleSheet("font-size: 17px; font-weight: 600; border-radius: 6px;")
+            btn.clicked.connect(lambda _, t=text: self._key(t))
+            grid.addWidget(btn, row, col)
+        root.addLayout(grid)
+
+        self._root = root
+        self._select("x")
+
+    def set_fahren_btn(self, btn: QtWidgets.QPushButton):
+        btn.setFixedHeight(58)
+        self._fahren_placeholder.addWidget(btn, stretch=1)
+
+    def _select(self, key: str):
+        self._active = key
+        for k in ("x", "z"):
+            active = k == key
+            card: QtWidgets.QPushButton = getattr(self, f"_btn_{k}")
+            if active:
+                card.setStyleSheet(
+                    f"QPushButton {{ background: rgba(124,58,237,0.25); "
+                    f"border: 2px solid {COL_SERVICE}; border-radius: 8px; text-align: left; }}")
+            else:
+                card.setStyleSheet(
+                    f"QPushButton {{ background: {COL_BG_SUNK}; "
+                    f"border: 1px solid {COL_BORDER}; border-radius: 8px; text-align: left; }}")
+            disp: QtWidgets.QLabel = getattr(self, f"_disp_{k}")
+            disp.setStyleSheet(
+                f"color: {'white' if active else COL_TEXT_DIM}; font-size: 22px; "
+                "font-weight: 700; background: transparent;")
+        self._update_disp()
+
+    def _key(self, text: str):
+        cur = self._vals[self._active]
+        if text == "C":
+            self._vals[self._active] = ""
+        elif text == "⌫":
+            self._vals[self._active] = cur[:-1]
+        else:
+            if len(cur) < self._max_digits:
+                if cur == "" and text == "0":
+                    self._vals[self._active] = "0"
+                else:
+                    self._vals[self._active] = cur + text
+        self._update_disp()
+
+    def _update_disp(self):
+        for k in ("x", "z"):
+            val = self._vals[k]
+            disp: QtWidgets.QLabel = getattr(self, f"_disp_{k}")
+            disp.setText(val if val else "—")
+
+    def value_x(self) -> Optional[int]:
+        return int(self._vals["x"]) if self._vals["x"] else None
+
+    def value_z(self) -> Optional[int]:
+        return int(self._vals["z"]) if self._vals["z"] else None
+
+    def clear_all(self):
+        self._vals = {"x": "", "z": ""}
+        self._update_disp()
 
 
 # ============================================================
@@ -599,6 +725,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.signals.drucker_status_changed.connect(lambda *_: self._refresh())
         self.signals.drucker_config_changed.connect(self._on_config_changed)
         self.signals.toast.connect(self._toast)
+        self.signals.fehler_quittiert.connect(self._on_fehler_quittiert_dialog)
 
         # Hauptablauf → Signals
         self.hauptablauf.on_state_change = lambda s: self.signals.state_changed.emit(s)
@@ -614,6 +741,8 @@ class MainWindow(QtWidgets.QMainWindow):
             lambda f: self.signals.fehler_neu.emit(f)
         self.hauptablauf.fehler.on_fehler_geloescht = \
             lambda: self.signals.fehler_geloescht.emit()
+        self.hauptablauf.on_fehler_quittiert = \
+            lambda w: self.signals.fehler_quittiert.emit(w)
 
         self._timer = QtCore.QTimer(self)
         self._timer.timeout.connect(self._refresh)
@@ -883,36 +1012,102 @@ class MainWindow(QtWidgets.QMainWindow):
         self.service_banner.setWordWrap(True)
         v.addWidget(self.service_banner)
 
-        # Schlitten zu Drucker fahren
-        v.addWidget(self._section_lbl("SCHLITTEN ZU DRUCKER FAHREN"))
+        # Aktuelle Schlitten-Position (immer sichtbar)
+        pos_card = self._make_card("")
+        pos_row = QtWidgets.QHBoxLayout(); pos_row.setSpacing(24)
+        self.svc_lbl_x = QtWidgets.QLabel("— mm")
+        self.svc_lbl_x.setStyleSheet(
+            f"color: {COL_TEXT}; font-size: 26px; font-weight: 700;")
+        self.svc_lbl_z = QtWidgets.QLabel("— mm")
+        self.svc_lbl_z.setStyleSheet(
+            f"color: {COL_TEXT}; font-size: 26px; font-weight: 700;")
+        for axis_label, widget in (("X", self.svc_lbl_x), ("Z", self.svc_lbl_z)):
+            col = QtWidgets.QVBoxLayout(); col.setSpacing(2)
+            lbl = QtWidgets.QLabel(axis_label)
+            lbl.setStyleSheet(f"color: {COL_TEXT_MUTED}; font-size: 11px;")
+            col.addWidget(lbl); col.addWidget(widget)
+            pos_row.addLayout(col)
+        pos_row.addStretch()
+        pos_card.layout().addLayout(pos_row)
+        v.addWidget(pos_card)
+
+        # Seiten-Auswahl
+        tab_row = QtWidgets.QHBoxLayout(); tab_row.setSpacing(0)
+        self._svc_tab_btns: list = []
+        for i, lbl in enumerate(["Übersicht", "Manuelle Fahrt"]):
+            btn = QtWidgets.QPushButton(lbl)
+            btn.setFixedHeight(36); btn.setFocusPolicy(QtCore.Qt.NoFocus)
+            btn.clicked.connect(lambda _, idx=i: self._svc_switch(idx))
+            tab_row.addWidget(btn)
+            self._svc_tab_btns.append(btn)
+        v.addLayout(tab_row)
+
+        self._svc_stack = QtWidgets.QStackedWidget()
+
+        # --- Seite 0: Übersicht ---
+        p0 = QtWidgets.QWidget()
+        p0v = QtWidgets.QVBoxLayout(p0)
+        p0v.setContentsMargins(0, 0, 0, 0); p0v.setSpacing(10)
+
+        p0v.addWidget(self._section_lbl("SCHLITTEN ZU DRUCKER FAHREN"))
         self.fahre_drucker_w = QtWidgets.QWidget()
         _flay = QtWidgets.QVBoxLayout(self.fahre_drucker_w)
         _flay.setContentsMargins(0, 0, 0, 0); _flay.setSpacing(8)
-        v.addWidget(self.fahre_drucker_w)
+        p0v.addWidget(self.fahre_drucker_w)
 
-        v.addWidget(self._section_lbl("ABLAGEN"))
+        p0v.addWidget(self._section_lbl("ABLAGEN"))
         self.fahre_ablage_w = QtWidgets.QWidget()
         self.fahre_ablage_w.setLayout(QtWidgets.QVBoxLayout())
         self.fahre_ablage_w.layout().setContentsMargins(0, 0, 0, 0)
         self.fahre_ablage_w.layout().setSpacing(8)
-        v.addWidget(self.fahre_ablage_w)
+        p0v.addWidget(self.fahre_ablage_w)
 
-        v.addWidget(self._section_lbl("MAGAZINE"))
+        p0v.addWidget(self._section_lbl("MAGAZINE"))
         self.fahre_magazin_w = QtWidgets.QWidget()
         self.fahre_magazin_w.setLayout(QtWidgets.QVBoxLayout())
         self.fahre_magazin_w.layout().setContentsMargins(0, 0, 0, 0)
         self.fahre_magazin_w.layout().setSpacing(8)
-        v.addWidget(self.fahre_magazin_w)
+        p0v.addWidget(self.fahre_magazin_w)
 
-        # Referenzfahrt
-        v.addWidget(self._section_lbl("REFERENZFAHRT"))
+        p0v.addWidget(self._section_lbl("REFERENZFAHRT"))
         self.btn_referenz = QtWidgets.QPushButton("Referenzfahrt durchführen")
         self.btn_referenz.setObjectName("primary")
         self.btn_referenz.clicked.connect(self._on_referenzfahrt)
-        v.addWidget(self.btn_referenz)
+        p0v.addWidget(self.btn_referenz)
+        p0v.addStretch()
 
-        v.addStretch()
+        # --- Seite 1: Manuelle Fahrt ---
+        p1 = QtWidgets.QWidget()
+        p1v = QtWidgets.QVBoxLayout(p1)
+        p1v.setContentsMargins(0, 0, 0, 0); p1v.setSpacing(10)
+
+        p1v.addWidget(self._section_lbl("MANUELLE POSITION ANFAHREN"))
+        self.svc_numpad = NumpadWidget()
+        btn_fahren = QtWidgets.QPushButton("▶  Fahren")
+        btn_fahren.setObjectName("service")
+        btn_fahren.setMinimumHeight(40); btn_fahren.setFocusPolicy(QtCore.Qt.NoFocus)
+        btn_fahren.clicked.connect(self._on_service_manuelle_pos)
+        self._svc_btn_fahren = btn_fahren
+        self.svc_numpad.set_fahren_btn(btn_fahren)
+        p1v.addWidget(self.svc_numpad)
+        p1v.addStretch()
+
+        self._svc_stack.addWidget(p0)
+        self._svc_stack.addWidget(p1)
+        v.addWidget(self._svc_stack, stretch=1)
+
+        self._svc_switch(0)
         return page
+
+    def _svc_switch(self, idx: int):
+        self._svc_stack.setCurrentIndex(idx)
+        for i, btn in enumerate(self._svc_tab_btns):
+            active = i == idx
+            btn.setStyleSheet(
+                f"QPushButton {{ background: {COL_SERVICE}; color: white; border: none; "
+                "font-weight: 700; border-radius: 0; }}" if active else
+                f"QPushButton {{ background: {COL_BG_CARD}; color: {COL_TEXT_DIM}; "
+                f"border: 1px solid {COL_BORDER}; border-radius: 0; }}")
 
     # ============================================================
     # Drucker-Seite
@@ -1458,11 +1653,16 @@ class MainWindow(QtWidgets.QMainWindow):
                 f"border: 1px solid {COL_DHBW_RED}; border-radius: 8px; "
                 "padding: 10px 14px; font-size: 12px;")
 
-        # Lager + Drucker-Buttons
+        # Aktuelle Position
+        self.svc_lbl_x.setText(f"{snap['esp']['x_mm']} mm")
+        self.svc_lbl_z.setText(f"{snap['esp']['z_mm']} mm")
+
+        # Lager + Drucker-Buttons + Fahren-Button
         for btn in self._service_lager_btns:
             btn.setEnabled(service_active)
         for btn in self._service_drucker_btns:
             btn.setEnabled(service_active)
+        self._svc_btn_fahren.setEnabled(service_active)
 
     def _refresh_fehler(self, snap):
         f = snap["fehler"]
@@ -1725,10 +1925,77 @@ class MainWindow(QtWidgets.QMainWindow):
     def _on_quittieren(self):
         self.hauptablauf.fehler.quittieren()
 
+    def _on_fehler_quittiert_dialog(self, waehrend_plattenwechsel: bool):
+        dlg = QtWidgets.QDialog(self)
+        dlg.setWindowTitle("Fehler quittiert — wie weiter?")
+        dlg.setMinimumWidth(400)
+        dlg.setStyleSheet(self.styleSheet())
+
+        v = QtWidgets.QVBoxLayout(dlg)
+        v.setSpacing(14); v.setContentsMargins(20, 20, 20, 20)
+
+        title = QtWidgets.QLabel("Wie soll es weitergehen?")
+        title.setStyleSheet(f"color: {COL_TEXT}; font-size: 16px; font-weight: 700;")
+        v.addWidget(title)
+
+        if waehrend_plattenwechsel:
+            info = QtWidgets.QLabel(
+                "Der Fehler trat während eines Plattenwechsels auf. "
+                "Schlitten, Ablage und Magazin bitte prüfen.")
+            info.setWordWrap(True)
+            info.setStyleSheet(
+                f"color: #FCA5A5; background: rgba(220,38,38,0.12); "
+                "border: 1px solid #DC2626; border-radius: 6px; padding: 8px 10px; font-size: 12px;")
+            v.addWidget(info)
+
+            chk_queue = QtWidgets.QCheckBox("Warteschlange leeren")
+            chk_queue.setChecked(True)
+            chk_queue.setStyleSheet(f"color: {COL_TEXT}; font-size: 13px;")
+            v.addWidget(chk_queue)
+        else:
+            chk_queue = None
+
+        v.addWidget(self._section_lbl("NÄCHSTER SCHRITT"))
+
+        btn_ref = QtWidgets.QPushButton("Referenzfahrt starten")
+        btn_ref.setObjectName("primary")
+        btn_ref.setMinimumHeight(44)
+        btn_man = QtWidgets.QPushButton("Manuell fortfahren")
+        btn_man.setMinimumHeight(44)
+
+        v.addWidget(btn_ref)
+        v.addWidget(btn_man)
+
+        result = {"referenzfahrt": True, "queue_leeren": waehrend_plattenwechsel}
+
+        def _accept(ref: bool):
+            result["referenzfahrt"] = ref
+            result["queue_leeren"] = chk_queue.isChecked() if chk_queue else False
+            dlg.accept()
+
+        btn_ref.clicked.connect(lambda: _accept(True))
+        btn_man.clicked.connect(lambda: _accept(False))
+
+        dlg.exec_()
+        self.hauptablauf.entscheidung_nach_fehler(
+            referenzfahrt=result["referenzfahrt"],
+            queue_leeren=result["queue_leeren"],
+        )
+
     def _on_service_drucker(self, did: int):
         self._run_service_cmd(
             lambda: self.hauptablauf.service_fahre_zu_drucker(did),
             f"→ Drucker {did}")
+
+    def _on_service_manuelle_pos(self):
+        x = self.svc_numpad.value_x()
+        z = self.svc_numpad.value_z()
+        if x is None or z is None:
+            self._toast("Manuelle Fahrt", "X und Z eingeben")
+            return
+        self._run_service_cmd(
+            lambda: self.hauptablauf.service_fahre_zu_position(x, z),
+            f"→ X={x} Z={z} mm")
 
     def _run_service_cmd(self, fn, ok_label: str):
         if self._service_busy:

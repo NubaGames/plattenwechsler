@@ -55,7 +55,18 @@
       "Bash(python3 -c \"import PIL; print\\('PIL ok'\\)\")",
       "Bash(python3 docs/generate_doku.py)",
       "Bash(python3 docs/generate_anhang.py)",
-      "Bash(python3 docs/generate_schnittstellen.py)"
+      "Bash(python3 docs/generate_schnittstellen.py)",
+      "Bash(python3 docs/generate_gesamt.py)",
+      "Bash(python3 -c \"from plattenwechsler.ui.main_window import MainWindow; print\\('OK'\\)\")",
+      "Bash(python3 -c \"from plattenwechsler.ui.main_window import MainWindow; from plattenwechsler.core.hauptablauf import Hauptablauf; print\\('OK'\\)\")",
+      "Bash(python3 -c \"from plattenwechsler.io_.mock_esp_client import MockEspClient; from plattenwechsler.io_.esp_client import BaseEspClient; print\\('OK'\\)\")",
+      "Bash(git update-ref *)",
+      "Bash(git commit *)",
+      "Bash(git fsck *)",
+      "Bash(git fetch *)",
+      "Bash(git reset *)",
+      "Bash(rm .git/index)",
+      "Bash(git read-tree *)"
     ],
     "additionalDirectories": [
       "/home/nura/Desktop",

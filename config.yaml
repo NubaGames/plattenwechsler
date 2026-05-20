@@ -6,10 +6,11 @@ esp:
   baud: 115200
   read_timeout_s: 0.1
   ack_timeout_s: 1.0
-  move_timeout_s: 60.0
-  home_timeout_s: 30.0
-  mech_timeout_s: 10.0
+  move_timeout_s: 180.0
+  home_timeout_s: 600.0
+  mech_timeout_s: 60.0
   heartbeat_timeout_s: 5.0
+  fehler_dialog_timeout_s: 300.0
   reconnect_intervall_s: 2.0
   skip_homing: false
 gpio:
@@ -23,15 +24,15 @@ drucker:
 - id: 1
   name: Drucker 1
   pin_fertig: 27
-  pos_x: 100
-  pos_z_anfahr: 200
-  pos_z_tuer: 220
-  pos_z_druckbett: 50
+  pos_x: 500
+  pos_z_anfahr: 500
+  pos_z_tuer: 520
+  pos_z_druckbett: 490
   door_arm_hub_mm: 50
   tuer_radius: 150
-  tuer_winkel: 90
-  gripper_depth: 120
-  lift_offset: 8
+  tuer_winkel: 180
+  gripper_depth: 150
+  lift_offset: 10
 - id: 2
   name: Drucker 2
   pin_fertig: 22
@@ -65,18 +66,18 @@ drucker:
 ablagen:
 - id: 1
   name: Ablage 1
-  x: 20
-  z: 20
+  x: 250
+  z: 500
   gripper_depth: 120
-  lift_offset: 8
+  lift_offset: 10
   belegt: false
 magazine:
 - id: 1
   name: Magazin 1
-  x: 50
-  z: 50
+  x: 200
+  z: 100
   gripper_depth: 120
-  lift_offset: 8
+  lift_offset: 10
   verfuegbar: true
 mqtt:
   enabled: true
