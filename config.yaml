@@ -24,59 +24,65 @@ drucker:
 - id: 1
   name: Drucker 1
   pin_fertig: 27
-  pos_x: 500
-  pos_z_anfahr: 500
-  pos_z_tuer: 520
+  pos_x: 655
+  pos_z_anfahr: 1450
+  pos_z_tuer: 1500
   pos_z_druckbett: 490
   door_arm_hub_mm: 50
   tuer_radius: 150
-  tuer_winkel: 180
-  gripper_depth: 150
+  tuer_winkel: 90
+  gripper_depth: 100
   lift_offset: 10
 - id: 2
   name: Drucker 2
   pin_fertig: 22
-  pos_x: 200
-  pos_z_anfahr: 200
-  pos_z_tuer: 220
-  pos_z_druckbett: 50
+  pos_x: 655
+  pos_z_anfahr: 100
+  pos_z_tuer: 150
+  pos_z_druckbett: 20
   door_arm_hub_mm: 50
-  gripper_depth: 120
-  lift_offset: 8
+  tuer_radius: 150
+  tuer_winkel: 90
+  gripper_depth: 100
+  lift_offset: 10
 - id: 3
   name: Drucker 3
   pin_fertig: 10
-  pos_x: 200
-  pos_z_anfahr: 100
-  pos_z_tuer: 120
+  pos_x: 1615
+  pos_z_anfahr: 1450
+  pos_z_tuer: 1500
   pos_z_druckbett: 50
   door_arm_hub_mm: 50
-  gripper_depth: 120
-  lift_offset: 8
+  tuer_radius: 150
+  tuer_winkel: 90
+  gripper_depth: 100
+  lift_offset: 1
 - id: 4
   name: Drucker 4
   pin_fertig: 9
-  pos_x: 100
+  pos_x: 1690
   pos_z_anfahr: 100
-  pos_z_tuer: 120
+  pos_z_tuer: 150
   pos_z_druckbett: 50
   door_arm_hub_mm: 50
-  gripper_depth: 120
-  lift_offset: 8
+  tuer_radius: 150
+  tuer_winkel: 90
+  gripper_depth: 100
+  lift_offset: 10
 ablagen:
 - id: 1
   name: Ablage 1
-  x: 250
+  x: 2000
   z: 500
-  gripper_depth: 120
+  gripper_depth: 100
   lift_offset: 10
   belegt: false
 magazine:
 - id: 1
   name: Magazin 1
-  x: 200
-  z: 100
-  gripper_depth: 120
+  x: 2000
+  z: 1000
+  gripper_depth: 100
   lift_offset: 10
   verfuegbar: true
 mqtt:

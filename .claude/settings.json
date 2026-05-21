@@ -68,7 +68,11 @@
       "Bash(rm .git/index)",
       "Bash(git read-tree *)",
       "Bash(python -m py_compile plattenwechsler/io_/telegram_client.py)",
-      "Bash(python -m py_compile plattenwechsler/main.py)"
+      "Bash(python -m py_compile plattenwechsler/main.py)",
+      "Bash(python3 /tmp/make_telegram_anleitung.py)",
+      "Bash(python3 -c \"from pptx import Presentation; print\\('ok'\\)\")",
+      "Bash(python3)",
+      "Bash(python3 /tmp/fill_software_slides.py)"
     ],
     "additionalDirectories": [
       "/home/nura/Desktop",
