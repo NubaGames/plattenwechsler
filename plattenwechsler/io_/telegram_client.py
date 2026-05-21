@@ -2,10 +2,16 @@
 
 Befehle:
   /status            aktueller Systemstatus
+  /fehler            aktiver Fehler mit Details
+  /queue             aktuelle Warteschlange
+  /drucker           Drucker-Übersicht
+  /magazin           Magazin-Befüllstand
+  /ablage            Ablage-Belegung
   /wechsel <id>      Plattenwechsel für Drucker N starten
   /quittieren        Fehler quittieren
-  /home              Referenzfahrt
-  /stop              Stopp
+  /home              Referenzfahrt starten
+  /stop              Motoren stoppen
+  /hilfe             alle Befehle
 """
 from __future__ import annotations
 
@@ -20,6 +26,21 @@ import json
 
 logger = logging.getLogger(__name__)
 
+_HILFE = (
+    "*Plattenwechsler-Bot — Befehle:*\n"
+    "/status — Systemstatus\n"
+    "/fehler — aktiver Fehler mit Details\n"
+    "/queue — Warteschlange\n"
+    "/drucker — Drucker-Übersicht\n"
+    "/magazin — Magazin-Befüllstand\n"
+    "/ablage — Ablage-Belegung\n"
+    "/wechsel `<id>` — Plattenwechsel für Drucker starten\n"
+    "/quittieren — Fehler quittieren\n"
+    "/home — Referenzfahrt starten\n"
+    "/stop — Motoren sofort stoppen\n"
+    "/hilfe — diese Übersicht"
+)
+
 
 class TelegramClient:
     def __init__(self, bot_token: str, allowed_chat_ids: List[int],
@@ -33,6 +54,11 @@ class TelegramClient:
         self._bot_username = None
 
         self.on_befehl_status: Optional[Callable[[], str]] = None
+        self.on_befehl_fehler: Optional[Callable[[], str]] = None
+        self.on_befehl_queue: Optional[Callable[[], str]] = None
+        self.on_befehl_drucker: Optional[Callable[[], str]] = None
+        self.on_befehl_magazin: Optional[Callable[[], str]] = None
+        self.on_befehl_ablage: Optional[Callable[[], str]] = None
         self.on_befehl_auftrag: Optional[Callable[[int], None]] = None
         self.on_befehl_quittieren: Optional[Callable[[], None]] = None
         self.on_befehl_home: Optional[Callable[[], None]] = None
@@ -98,9 +124,34 @@ class TelegramClient:
                     self._send(chat_id, self.on_befehl_status())
                 else:
                     self._send(chat_id, "Status nicht verfügbar")
+            elif cmd == "fehler":
+                if self.on_befehl_fehler:
+                    self._send(chat_id, self.on_befehl_fehler())
+                else:
+                    self._send(chat_id, "Fehlerstatus nicht verfügbar")
+            elif cmd == "queue":
+                if self.on_befehl_queue:
+                    self._send(chat_id, self.on_befehl_queue())
+                else:
+                    self._send(chat_id, "Queue nicht verfügbar")
+            elif cmd == "drucker":
+                if self.on_befehl_drucker:
+                    self._send(chat_id, self.on_befehl_drucker())
+                else:
+                    self._send(chat_id, "Druckerstatus nicht verfügbar")
+            elif cmd == "magazin":
+                if self.on_befehl_magazin:
+                    self._send(chat_id, self.on_befehl_magazin())
+                else:
+                    self._send(chat_id, "Magazinstatus nicht verfügbar")
+            elif cmd == "ablage":
+                if self.on_befehl_ablage:
+                    self._send(chat_id, self.on_befehl_ablage())
+                else:
+                    self._send(chat_id, "Ablagestatus nicht verfügbar")
             elif cmd in ("wechsel", "auftrag"):
                 if not rest:
-                    self._send(chat_id, "Nutzung: /wechsel <drucker_id>")
+                    self._send(chat_id, "Nutzung: /wechsel <drucker\\_id>")
                     return
                 try:
                     did = int(rest[0])
@@ -111,9 +162,15 @@ class TelegramClient:
                     self.on_befehl_auftrag(did)
                     self._send(chat_id, f"Auftrag für Drucker {did} angenommen")
             elif cmd == "quittieren":
+                fehler_info = (self.on_befehl_fehler() if self.on_befehl_fehler else None)
                 if self.on_befehl_quittieren:
                     self.on_befehl_quittieren()
-                    self._send(chat_id, "Fehler quittiert")
+                    if fehler_info:
+                        self._send(chat_id, f"Quittiert:\n{fehler_info}")
+                    else:
+                        self._send(chat_id, "Fehler quittiert")
+                else:
+                    self._send(chat_id, "Quittieren nicht verfügbar")
             elif cmd == "home":
                 if self.on_befehl_home:
                     self.on_befehl_home()
@@ -122,9 +179,10 @@ class TelegramClient:
                 if self.on_befehl_stop:
                     self.on_befehl_stop()
                     self._send(chat_id, "STOP gesendet")
+            elif cmd in ("hilfe", "help"):
+                self._send(chat_id, _HILFE)
             else:
-                self._send(chat_id,
-                    "Befehle: /status /wechsel <id> /quittieren /home /stop")
+                self._send(chat_id, _HILFE)
         except Exception as e:
             logger.exception("Telegram-Befehl")
             self._send(chat_id, f"Fehler: {e}")

@@ -126,6 +126,11 @@ def main() -> int:
                                               default=True),
             )
             tg_client.on_befehl_status = lambda: _telegram_status_text(hauptablauf)
+            tg_client.on_befehl_fehler = lambda: _telegram_fehler_text(hauptablauf)
+            tg_client.on_befehl_queue = lambda: _telegram_queue_text(hauptablauf)
+            tg_client.on_befehl_drucker = lambda: _telegram_drucker_text(hauptablauf, cfg)
+            tg_client.on_befehl_magazin = lambda: _telegram_magazin_text(cfg)
+            tg_client.on_befehl_ablage = lambda: _telegram_ablage_text(cfg)
             tg_client.on_befehl_auftrag = lambda did: hauptablauf.auftrag_aufnehmen(
                 did, AuftragQuelle.TELEGRAM)
             tg_client.on_befehl_quittieren = fehler.quittieren
@@ -143,7 +148,10 @@ def main() -> int:
                 "esp_code": f.esp_code, "ts": f.timestamp,
             })
         if tg_client:
-            tg_client.broadcast(f"🚨 *Fehler*: {f.klasse.value}\n{f.nachricht}")
+            extra = f"\nESP-Code: `{f.esp_code}`" if f.esp_code else ""
+            tg_client.broadcast(
+                f"🚨 *Fehler: {f.klasse.value}*\n{f.nachricht}{extra}\n"
+                f"➡ /quittieren zum Bestätigen")
     fehler.on_fehler_neu = _wrap_chain(fehler.on_fehler_neu, _broadcast_fehler)
 
     def _broadcast_ok(a):
@@ -156,6 +164,29 @@ def main() -> int:
             tg_client.broadcast(f"✅ Drucker {a.drucker_id} fertig gewechselt")
     hauptablauf.on_auftrag_erfolgreich = _wrap_chain(
         hauptablauf.on_auftrag_erfolgreich, _broadcast_ok)
+
+    def _broadcast_abgelehnt(a, grund):
+        if tg_client:
+            tg_client.broadcast(f"⚠️ Auftrag Drucker {a.drucker_id} abgelehnt: {grund}")
+    hauptablauf.on_auftrag_abgelehnt = _wrap_chain(
+        hauptablauf.on_auftrag_abgelehnt, _broadcast_abgelehnt)
+
+    from .types import SystemState as _SS
+    _prev_state: list = [None]
+    def _on_state_change_tg(state):
+        prev = _prev_state[0]
+        _prev_state[0] = state
+        if not tg_client:
+            return
+        if state == _SS.PLATTENWECHSEL:
+            did = hauptablauf.aktiver_drucker
+            tg_client.broadcast(f"🔄 Plattenwechsel Drucker {did} gestartet")
+        elif state == _SS.BEREITSCHAFT and prev in (_SS.FEHLER, _SS.NOT_AUS, _SS.REFERENZFAHRT):
+            tg_client.broadcast("✅ System wieder bereit (Bereitschaft)")
+        elif state == _SS.NOT_AUS:
+            tg_client.broadcast("🛑 *NOT-AUS* betätigt!")
+    hauptablauf.on_state_change = _wrap_chain(
+        hauptablauf.on_state_change, _on_state_change_tg)
 
     # Lifecycle
     gpio.setup()
@@ -228,18 +259,104 @@ def _wrap_chain(orig, neu):
 def _telegram_status_text(ha: Hauptablauf) -> str:
     s = ha.status_snapshot()
     f = s["fehler"]
+    aktiv = f"Drucker {s['aktiver_drucker']}" if s["aktiver_drucker"] else "–"
     txt = (
-        f"*Plattenwechsler*\n"
+        f"*Plattenwechsler Status*\n"
         f"System: `{s['system_state']}`\n"
-        f"ESP: `{s['esp']['state']}` (ref={'1' if s['esp']['referenced'] else '0'})\n"
+        f"ESP: `{s['esp']['state']}` (ref={'ja' if s['esp']['referenced'] else 'nein'})\n"
         f"Position: X={s['esp']['x_mm']} Z={s['esp']['z_mm']}\n"
-        f"Queue: {s['queue_length']}\n"
+        f"Aktiv: {aktiv} | Queue: {s['queue_length']}\n"
         f"Erfolg/Abgelehnt/Fehler: "
         f"{s['stats']['erfolg']}/{s['stats']['abgelehnt']}/{s['stats']['fehler']}"
     )
     if f:
-        txt += f"\n🚨 {f['klasse']} – {f['nachricht']}"
+        txt += f"\n🚨 *{f['klasse']}*: {f['nachricht']}"
+        if f["esp_code"]:
+            txt += f" (`{f['esp_code']}`)"
+        if not f["quittiert"]:
+            txt += "\n➡ /quittieren"
     return txt
+
+
+def _telegram_fehler_text(ha: Hauptablauf) -> str:
+    s = ha.status_snapshot()
+    f = s["fehler"]
+    if not f:
+        return "✅ Kein aktiver Fehler"
+    import time as _time
+    alter = int(_time.time() - f["timestamp"])
+    txt = (
+        f"🚨 *Aktiver Fehler*\n"
+        f"Klasse: `{f['klasse']}`\n"
+        f"Nachricht: {f['nachricht']}\n"
+    )
+    if f["esp_code"]:
+        txt += f"ESP-Code: `{f['esp_code']}`\n"
+    txt += f"Alter: {alter}s"
+    if not f["quittiert"]:
+        txt += "\n\n➡ /quittieren zum Bestätigen"
+    else:
+        txt += "\n_(quittiert, wird verarbeitet)_"
+    return txt
+
+
+def _telegram_queue_text(ha: Hauptablauf) -> str:
+    s = ha.status_snapshot()
+    if not s["queue"]:
+        return "📋 Warteschlange leer"
+    zeilen = ["📋 *Warteschlange*"]
+    for i, a in enumerate(s["queue"], 1):
+        zeilen.append(f"{i}. Drucker {a['drucker']} (Quelle: {a['quelle']})")
+    return "\n".join(zeilen)
+
+
+def _telegram_drucker_text(ha: Hauptablauf, cfg) -> str:
+    s = ha.status_snapshot()
+    drucker = cfg.drucker_liste()
+    if not drucker:
+        return "Keine Drucker konfiguriert"
+    zeilen = ["🖨 *Drucker-Status*"]
+    icons = {"BEREIT": "🟢", "IN_QUEUE": "🟡", "AKTIV": "🔵"}
+    for d in drucker:
+        status = s["drucker_status"].get(d.id, "BEREIT")
+        icon = icons.get(status, "⚪")
+        zeilen.append(f"{icon} *{d.name}* (ID {d.id}): `{status}`")
+    aktiv = s["aktiver_drucker"]
+    if aktiv:
+        zeilen.append(f"\n▶ Laufender Wechsel: Drucker {aktiv}")
+    return "\n".join(zeilen)
+
+
+def _telegram_magazin_text(cfg) -> str:
+    magazine = cfg.magazin_liste() if hasattr(cfg, "magazin_liste") else []
+    if not magazine:
+        return "Keine Magazine konfiguriert"
+    zeilen = ["📦 *Magazin-Status*"]
+    frei = 0
+    for m in magazine:
+        icon = "🟢" if m.verfuegbar else "🔴"
+        zeilen.append(f"{icon} {m.name} (ID {m.id}): "
+                      f"{'verfügbar' if m.verfuegbar else 'leer'}")
+        if m.verfuegbar:
+            frei += 1
+    zeilen.append(f"\nVerfügbar: {frei}/{len(magazine)}")
+    return "\n".join(zeilen)
+
+
+def _telegram_ablage_text(cfg) -> str:
+    ablagen = cfg.ablage_liste() if hasattr(cfg, "ablage_liste") else []
+    if not ablagen:
+        return "Keine Ablagen konfiguriert"
+    zeilen = ["🗂 *Ablage-Status*"]
+    frei = 0
+    for a in ablagen:
+        icon = "🔴" if a.belegt else "🟢"
+        zeilen.append(f"{icon} {a.name} (ID {a.id}): "
+                      f"{'belegt' if a.belegt else 'frei'}")
+        if not a.belegt:
+            frei += 1
+    zeilen.append(f"\nFrei: {frei}/{len(ablagen)}")
+    return "\n".join(zeilen)
 
 
 def _force_mqtt_publish(mqtt_client, hauptablauf: Hauptablauf):
