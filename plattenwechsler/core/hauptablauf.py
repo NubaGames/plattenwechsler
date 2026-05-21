@@ -495,9 +495,10 @@ class Hauptablauf:
         logger.info("OPEN_DOOR Drucker %d", d.id)
         try:
             self.esp.open_door(
-                x_approach=d.pos_x, z_approach=d.pos_z_tuer,
+                x_approach=d.pos_x_tuer, z_approach=d.pos_z_tuer,
                 arm_extend=d.door_arm_hub_mm,
                 radius=d.tuer_radius, angle=d.tuer_winkel,
+                hook_drop=d.hook_drop,
                 timeout_s=self._move_timeout_s)
         except EspBefehlAbgelehnt as e:
             raise PlattenwechslerError(ErrorClass.TUERFEHLER,
@@ -507,7 +508,7 @@ class Hauptablauf:
                 f"Tür öffnen: {e}")
 
     def _tuer_schliessen(self, d: DruckerConfig):
-        x_close = d.pos_x + int(d.tuer_radius * (math.cos(math.radians(d.tuer_winkel)) - 1))
+        x_close = d.pos_x_tuer + int(d.tuer_radius * (math.cos(math.radians(d.tuer_winkel)) - 1))
         self._fahre(d.pos_x, d.pos_z_anfahr, f"Drucker {d.id} Ausgangsposition (Schließen)")
         logger.info("CLOSE_DOOR Drucker %d x_approach=%d", d.id, x_close)
         try:
@@ -515,6 +516,7 @@ class Hauptablauf:
                 x_approach=x_close, z_approach=d.pos_z_tuer,
                 arm_extend=d.door_arm_hub_mm,
                 radius=d.tuer_radius, angle=d.tuer_winkel,
+                hook_drop=d.hook_drop,
                 timeout_s=self._move_timeout_s)
         except EspBefehlAbgelehnt as e:
             raise PlattenwechslerError(ErrorClass.TUERFEHLER,

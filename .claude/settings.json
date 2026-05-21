@@ -72,7 +72,10 @@
       "Bash(python3 /tmp/make_telegram_anleitung.py)",
       "Bash(python3 -c \"from pptx import Presentation; print\\('ok'\\)\")",
       "Bash(python3)",
-      "Bash(python3 /tmp/fill_software_slides.py)"
+      "Bash(python3 /tmp/fill_software_slides.py)",
+      "Bash(python -c \"from plattenwechsler.types import DruckerConfig; from plattenwechsler.core.hauptablauf import Hauptablauf; from plattenwechsler.ui.main_window import DruckerEditor; print\\('OK'\\)\")",
+      "Bash(python -c \"from plattenwechsler.ui.main_window import OnScreenKeyboard; print\\('OK'\\)\")",
+      "Bash(python -c \"from plattenwechsler.ui.main_window import DruckerEditor; print\\('OK'\\)\")"
     ],
     "additionalDirectories": [
       "/home/nura/Desktop",

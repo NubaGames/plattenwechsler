@@ -409,7 +409,7 @@ class DruckerEditor(QtWidgets.QFrame):
         # Tab-Leiste
         tab_row = QtWidgets.QHBoxLayout(); tab_row.setSpacing(0)
         self._tab_btns: list = []
-        for i, label in enumerate(["Positionen", "Tür / Greifer"]):
+        for i, label in enumerate(["Positionen", "Tür", "Greifer"]):
             btn = QtWidgets.QPushButton(label)
             btn.setFixedHeight(34)
             btn.setFocusPolicy(QtCore.Qt.NoFocus)
@@ -419,17 +419,19 @@ class DruckerEditor(QtWidgets.QFrame):
         root.addLayout(tab_row)
 
         # Felder
-        self.f_pos_x  = self._spin(0, 5000, dc.pos_x,           "mm")
-        self.f_anfahr = self._spin(0, 2000, dc.pos_z_anfahr,     "mm")
-        self.f_bett   = self._spin(0, 2000, dc.pos_z_druckbett,  "mm")
-        self.f_tuer   = self._spin(0, 2000, dc.pos_z_tuer,       "mm")
-        self.f_hub    = self._spin(0,  500, dc.door_arm_hub_mm,  "mm")
-        self.f_gd     = self._spin(0,  500, dc.gripper_depth,    "mm")
-        self.f_lo     = self._spin(0,  100, dc.lift_offset,      "mm")
-        self.f_radius = self._spin(0, 9999, dc.tuer_radius, "mm")
-        self.f_winkel = self._spin(0,  360, dc.tuer_winkel, "°")
+        self.f_pos_x     = self._spin(0, 5000, dc.pos_x,         "mm")
+        self.f_pos_x_tuer= self._spin(0, 5000, dc.pos_x_tuer,    "mm")
+        self.f_anfahr    = self._spin(0, 2000, dc.pos_z_anfahr,   "mm")
+        self.f_bett      = self._spin(0, 2000, dc.pos_z_druckbett,"mm")
+        self.f_tuer      = self._spin(0, 2000, dc.pos_z_tuer,     "mm")
+        self.f_hub       = self._spin(0,  500, dc.door_arm_hub_mm,"mm")
+        self.f_gd        = self._spin(0,  500, dc.gripper_depth,  "mm")
+        self.f_lo        = self._spin(0,  100, dc.lift_offset,    "mm")
+        self.f_radius    = self._spin(0, 9999, dc.tuer_radius,    "mm")
+        self.f_winkel    = self._spin(0,  360, dc.tuer_winkel,    "°")
+        self.f_hook      = self._spin(0,  500, dc.hook_drop,      "mm")
 
-        # Seite 1: Positionen — alle drei Positionswerte in einer Zeile
+        # Seite 1: Positionen (allgemeine Fahrpositionen)
         p1 = QtWidgets.QWidget()
         p1_lay = QtWidgets.QVBoxLayout(p1)
         p1_lay.setContentsMargins(0, 4, 0, 0); p1_lay.setSpacing(6)
@@ -439,19 +441,33 @@ class DruckerEditor(QtWidgets.QFrame):
             ("Z Druckbett", self.f_bett)))
         p1_lay.addStretch()
 
-        # Seite 2: Tür & Greifer — Pin Fertig gehört hierher
+        # Seite 2: Tür — alle 6 OPEN_DOOR / CLOSE_DOOR Parameter
         p2 = QtWidgets.QWidget()
         p2_lay = QtWidgets.QVBoxLayout(p2)
         p2_lay.setContentsMargins(0, 4, 0, 0); p2_lay.setSpacing(6)
         p2_lay.addLayout(self._grid_row(
-            ("Z Türarm",      self.f_tuer), ("Türarm-Hub",    self.f_hub), ("Türradius",     self.f_radius)))
+            ("x_approach", self.f_pos_x_tuer),
+            ("z_approach", self.f_tuer),
+            ("arm_extend", self.f_hub)))
         p2_lay.addLayout(self._grid_row(
-            ("Greifer",       self.f_gd),   ("Hub-Offset",    self.f_lo),  ("Öffnungswinkel", self.f_winkel)))
+            ("radius",     self.f_radius),
+            ("angle",      self.f_winkel),
+            ("hook_drop",  self.f_hook)))
         p2_lay.addStretch()
+
+        # Seite 3: Greifer (PICKUP / DEPOSIT Parameter)
+        p3 = QtWidgets.QWidget()
+        p3_lay = QtWidgets.QVBoxLayout(p3)
+        p3_lay.setContentsMargins(0, 4, 0, 0); p3_lay.setSpacing(6)
+        p3_lay.addLayout(self._grid_row(
+            ("gripper_depth", self.f_gd),
+            ("lift_offset",   self.f_lo)))
+        p3_lay.addStretch()
 
         self._stack = QtWidgets.QStackedWidget()
         self._stack.addWidget(p1)
         self._stack.addWidget(p2)
+        self._stack.addWidget(p3)
         root.addWidget(self._stack, stretch=1)
 
         # Speichern / Entfernen
@@ -513,12 +529,14 @@ class DruckerEditor(QtWidgets.QFrame):
             name=self.f_name.text().strip() or f"Drucker {self._dc.id}",
             pin_fertig=self.f_pin.value(),
             pos_x=self.f_pos_x.value(),
+            pos_x_tuer=self.f_pos_x_tuer.value(),
             pos_z_anfahr=self.f_anfahr.value(),
             pos_z_tuer=self.f_tuer.value(),
             pos_z_druckbett=self.f_bett.value(),
             door_arm_hub_mm=self.f_hub.value(),
             tuer_radius=self.f_radius.value(),
             tuer_winkel=self.f_winkel.value(),
+            hook_drop=self.f_hook.value(),
             gripper_depth=self.f_gd.value(),
             lift_offset=self.f_lo.value(),
         )
@@ -554,21 +572,21 @@ class OnScreenKeyboard(QtWidgets.QWidget):
         self.setStyleSheet(f"""
             QPushButton {{
                 background: {COL_BG_CARD}; color: {COL_TEXT};
-                border: 1px solid {COL_BORDER}; border-radius: 6px;
-                font-size: 14px; font-weight: 500;
+                border: 1px solid {COL_BORDER}; border-radius: 5px;
+                font-size: 12px; font-weight: 500;
             }}
             QPushButton:pressed {{ background: {COL_DHBW_RED}; border-color: {COL_DHBW_RED}; }}
-            QPushButton#spec {{ background: {COL_BG_SUNK}; font-size: 12px; }}
+            QPushButton#spec {{ background: {COL_BG_SUNK}; font-size: 11px; }}
         """)
         v = QtWidgets.QVBoxLayout(self)
-        v.setContentsMargins(10, 12, 10, 12); v.setSpacing(6)
+        v.setContentsMargins(8, 6, 8, 6); v.setSpacing(4)
 
         for row in self._ROWS:
-            h = QtWidgets.QHBoxLayout(); h.setSpacing(6)
+            h = QtWidgets.QHBoxLayout(); h.setSpacing(4)
             for key in row:
                 btn = QtWidgets.QPushButton(key)
                 btn.setFocusPolicy(QtCore.Qt.NoFocus)
-                btn.setFixedHeight(44)
+                btn.setFixedHeight(32)
                 is_spec = key in ("⌫", "↵", "⇧", "✕")
                 if is_spec:
                     btn.setObjectName("spec")
@@ -579,10 +597,10 @@ class OnScreenKeyboard(QtWidgets.QWidget):
             v.addLayout(h)
 
         # Leerzeichen
-        h_sp = QtWidgets.QHBoxLayout(); h_sp.setSpacing(6)
+        h_sp = QtWidgets.QHBoxLayout(); h_sp.setSpacing(4)
         sp = QtWidgets.QPushButton("Leerzeichen")
         sp.setFocusPolicy(QtCore.Qt.NoFocus)
-        sp.setFixedHeight(44)
+        sp.setFixedHeight(32)
         sp.clicked.connect(lambda: self._press(" "))
         h_sp.addWidget(sp)
         v.addLayout(h_sp)

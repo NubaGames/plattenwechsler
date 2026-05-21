@@ -25,12 +25,14 @@ drucker:
   name: Drucker 1
   pin_fertig: 27
   pos_x: 655
+  pos_x_tuer: 1050
   pos_z_anfahr: 1450
   pos_z_tuer: 1500
-  pos_z_druckbett: 490
+  pos_z_druckbett: 1480
   door_arm_hub_mm: 50
   tuer_radius: 150
   tuer_winkel: 90
+  hook_drop: 0
   gripper_depth: 100
   lift_offset: 10
 - id: 2
@@ -60,28 +62,30 @@ drucker:
 - id: 4
   name: Drucker 4
   pin_fertig: 9
-  pos_x: 1690
+  pos_x: 1695
+  pos_x_tuer: 1750
   pos_z_anfahr: 100
-  pos_z_tuer: 150
+  pos_z_tuer: 500
   pos_z_druckbett: 50
   door_arm_hub_mm: 50
   tuer_radius: 150
   tuer_winkel: 90
+  hook_drop: 0
   gripper_depth: 100
   lift_offset: 10
 ablagen:
 - id: 1
   name: Ablage 1
-  x: 2000
-  z: 500
+  x: 3500
+  z: 100
   gripper_depth: 100
   lift_offset: 10
   belegt: false
 magazine:
 - id: 1
   name: Magazin 1
-  x: 2000
-  z: 1000
+  x: 3500
+  z: 900
   gripper_depth: 100
   lift_offset: 10
   verfuegbar: true

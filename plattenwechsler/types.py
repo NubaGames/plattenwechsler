@@ -98,23 +98,27 @@ class DruckerConfig:
     id: int
     name: str = ""
     pin_fertig: int = 0
-    pos_x: int = 0
+    pos_x: int = 0            # X-Position Druckbett (MOVE_TO, PICKUP/DEPOSIT)
+    pos_x_tuer: int = 0       # → x_approach bei OPEN/CLOSE_DOOR (Tür-X, kann abweichen)
     pos_z_anfahr: int = 0
-    pos_z_tuer: int = 0
+    pos_z_tuer: int = 0       # → z_approach bei OPEN/CLOSE_DOOR
     pos_z_druckbett: int = 0
-    door_arm_hub_mm: int = 50
-    tuer_radius: int = 150
-    tuer_winkel: int = 90
-    gripper_depth: int = 120
-    lift_offset: int = 8
+    door_arm_hub_mm: int = 50  # → arm_extend bei OPEN/CLOSE_DOOR
+    tuer_radius: int = 150     # → radius bei OPEN/CLOSE_DOOR
+    tuer_winkel: int = 90      # → angle bei OPEN/CLOSE_DOOR
+    hook_drop: int = 0         # → hook_drop bei OPEN/CLOSE_DOOR
+    gripper_depth: int = 120   # → gripper_depth bei PICKUP/DEPOSIT
+    lift_offset: int = 8       # → lift_offset bei PICKUP/DEPOSIT
 
     def to_dict(self) -> dict:
         return {
             "id": self.id, "name": self.name, "pin_fertig": self.pin_fertig,
-            "pos_x": self.pos_x, "pos_z_anfahr": self.pos_z_anfahr,
+            "pos_x": self.pos_x, "pos_x_tuer": self.pos_x_tuer,
+            "pos_z_anfahr": self.pos_z_anfahr,
             "pos_z_tuer": self.pos_z_tuer, "pos_z_druckbett": self.pos_z_druckbett,
             "door_arm_hub_mm": self.door_arm_hub_mm,
             "tuer_radius": self.tuer_radius, "tuer_winkel": self.tuer_winkel,
+            "hook_drop": self.hook_drop,
             "gripper_depth": self.gripper_depth, "lift_offset": self.lift_offset,
         }
 
@@ -125,12 +129,14 @@ class DruckerConfig:
             name=str(d.get("name", "") or f"Drucker {d['id']}"),
             pin_fertig=int(d.get("pin_fertig", 0)),
             pos_x=int(d.get("pos_x", 0)),
+            pos_x_tuer=int(d.get("pos_x_tuer", d.get("pos_x", 0))),
             pos_z_anfahr=int(d.get("pos_z_anfahr", 0)),
             pos_z_tuer=int(d.get("pos_z_tuer", 0)),
             pos_z_druckbett=int(d.get("pos_z_druckbett", 0)),
             door_arm_hub_mm=int(d.get("door_arm_hub_mm", 50)),
             tuer_radius=int(d.get("tuer_radius", 150)),
             tuer_winkel=int(d.get("tuer_winkel", 90)),
+            hook_drop=int(d.get("hook_drop", 0)),
             gripper_depth=int(d.get("gripper_depth", 120)),
             lift_offset=int(d.get("lift_offset", 8)),
         )
